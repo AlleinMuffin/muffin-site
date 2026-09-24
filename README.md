@@ -57,6 +57,10 @@ python -m http.server 8000
   若确实需要统一的中文呈现（例如 Linux 访客较多），可按同样方式自托管 Noto Sans SC 的子集文件。
 - 动效全部克制：Hero 淡入上移、Scroll Reveal 600ms、卡片 hover 上浮 4px、在线点呼吸；
   `prefers-reduced-motion` 下全部关闭。
+- 服务器状态：`assets/js/main.js` 的 `STATUS_SOURCES` 会依次尝试多个数据源
+  （`api.mcsrvstat.us` → `api.mcstatus.io`），任一返回确定结果即采用，避免单源被墙或抽风。
+  显示四态：`ONLINE` / `OFFLINE` / `CHECKING` / `NO SIGNAL`。查不到时**不会**伪装成在线；
+  服务器离线时人数显示 `–` 而不是上一次的旧数字。默认 60 秒自动刷新，标签页不可见时跳过。
 - 无障碍：Lightbox 支持 Esc / ←→ / 焦点圈定，复制按钮有 aria-label，对比度达 WCAG AA。
 
 ## 上线与版本管理
@@ -77,6 +81,25 @@ git push                 # 推 GitHub，做异地备份
 ```
 
 - 站点是纯静态的，所以换托管平台零成本——这份源码推到任何支持静态托管的平台都能重建。
+
+### ⚠ 改 CSS / JS 后必须递增版本号
+
+托管平台的 CDN 会**按文件路径**缓存静态资源。源文件明明已经更新，但 `assets/css/style.css`
+和 `assets/js/main.js` 这些路径仍会被下发旧内容，而且返回 `200`（只有 HTML 能正常刷新）。
+**症状**：线上表现明显是旧版本，比如代码里改过的值在页面上一分未变。
+
+因此这两个文件在 `index.html` 里的引用带了版本号，**每次改动都要 +1**：
+
+```html
+<link rel="stylesheet" href="assets/css/style.css?v=5" />
+<script src="assets/js/main.js?v=5" defer></script>
+```
+
+发布后用内容校验，别只看状态码：
+
+```bash
+diff <(curl -s https://muffin-server.app.workbuddy.host/assets/js/main.js?v=5) assets/js/main.js
+```
 
 ## 重新生成占位图（可选）
 
