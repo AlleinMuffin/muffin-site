@@ -43,6 +43,21 @@ python -m http.server 8000
   `prefers-reduced-motion` 下全部关闭。
 - 无障碍：Lightbox 支持 Esc / ←→ / 焦点圈定，复制按钮有 aria-label，对比度达 WCAG AA。
 
+## 上线与版本管理
+
+- 当前线上地址：<https://muffin-server.app.workbuddy.host/>
+- 管理入口：**设置 — 数据管理 — 应用**
+- 本目录已初始化 Git 仓库并做了首次提交（`core.autocrlf=false`，源文件统一 LF）。
+- **重要**：修改文件属于本地改动，不会自动同步到线上。要更新线上内容，需要显式再发布一次，
+  链接保持不变但线上现有内容会被覆盖。
+- 站点是纯静态的，所以换托管平台零成本——把这份文件推到任何支持静态托管的平台即可重建，
+  建议保留一个远端仓库作为异地备份。
+
+```bash
+git remote add origin <你的仓库地址>
+git push -u origin main
+```
+
 ## 重新生成占位图（可选）
 
 ```bash
