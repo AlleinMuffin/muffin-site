@@ -29,8 +29,13 @@ python -m http.server 8000
 
 - `assets/js/main.js` 顶部的 `SERVER` 对象：`ip`、`version`、`players/max`、`motd`、
   以及 `liveStatus`（为 `true` 时会请求 `api.mcsrvstat.us` 读取实时状态，失败自动回落静态值）。
-- 全局搜索 `https://github.com/your-name`，换成你的 GitHub 主页与各仓库地址。
+  **当前仍是占位值 `play.example.com`，上线前务必改掉。**
 - Projects 区的下载链接目前是 `href="#"` 占位，指向你的 Release 页即可。
+- GitHub 链接已接入真实账号 `AlleinMuffin`：
+  - 导航栏 / Hero / GitHub 区 → <https://github.com/AlleinMuffin>
+  - 主项目卡 Muffin Launcher → `Muffin-s-ModPack-Mod-Updated` 仓库
+  - Server Tools / Datapack Experiments 两张卡**暂无对应仓库**，暂时指向主页，
+    `index.html` 里已留 `TODO` 注释，仓库建好后替换 `href` 即可。
 
 ## 技术说明
 
@@ -50,13 +55,17 @@ python -m http.server 8000
 - 本目录已初始化 Git 仓库并做了首次提交（`core.autocrlf=false`，源文件统一 LF）。
 - **重要**：修改文件属于本地改动，不会自动同步到线上。要更新线上内容，需要显式再发布一次，
   链接保持不变但线上现有内容会被覆盖。
-- 站点是纯静态的，所以换托管平台零成本——把这份文件推到任何支持静态托管的平台即可重建，
-  建议保留一个远端仓库作为异地备份。
+- 远端仓库：<https://github.com/AlleinMuffin/muffin-site>（分支 `main`，已与本地同步）
+- 日常改动流程：
 
 ```bash
-git remote add origin <你的仓库地址>
-git push -u origin main
+git add -A
+git commit -m "描述这次改了什么"
+git push                 # 推 GitHub，做异地备份
+# 想让改动出现在 muffin-server.app.workbuddy.host 上，还需要再发布一次
 ```
+
+- 站点是纯静态的，所以换托管平台零成本——这份源码推到任何支持静态托管的平台都能重建。
 
 ## 重新生成占位图（可选）
 
