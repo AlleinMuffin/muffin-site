@@ -17,15 +17,33 @@ const SERVER = {
   motd: "Mechanomania Aeronautics",
   liveStatus: true, // set false to skip the online lookup entirely
   refreshMs: 60000, // 自动刷新间隔
-  timeoutMs: 5000, // 单个数据源的超时上限
+  timeoutMs: 6000, // 单个数据源的超时上限（跨洲探测较慢，别设太短）
 };
 
-/* 多个状态数据源：按顺序尝试，任何一个给出确定结果就停止。
- * 这样即使某个接口在某个网络环境下被墙或抽风，也能拿到真实状态。 */
+/* --------------------------------------------------------------------------
+ * 状态探测：三个源并行查询，投票决定结果。
+ *
+ * 为什么要三个？这些 API 都在 CDN 后面，某个边缘节点会把一次"失败探测"的结果
+ * 缓存下来；访客下次正好命中那个节点就会看到莫名其妙的 OFFLINE。
+ * 解决办法有两条：
+ *   1) URL 带随机时间戳 —— 每次都是全新缓存键，拿到的必然是源站新鲜数据；
+ *   2) 多源投票 —— 只要有任何一个源确认在线就判定在线，单个节点的坏缓存无法一票否决。
+ * ------------------------------------------------------------------------ */
+const stripColorCodes = (s) => String(s || "").replace(/§[0-9a-fk-orA-FK-OR]/g, "").trim();
+
+// 拆出 host / port，minetools 用的是 /ping/<host>/<port> 这种路径形式
+const HOST_PORT = (() => {
+  const i = SERVER.ip.lastIndexOf(":");
+  return i > -1 ? [SERVER.ip.slice(0, i), SERVER.ip.slice(i + 1)] : [SERVER.ip, "25565"];
+})();
+
+// 加随机参数穿透 CDN 缓存
+const bust = (u) => u + (u.indexOf("?") > -1 ? "&" : "?") + "_=" + Date.now();
+
 const STATUS_SOURCES = [
   {
     name: "mcsrvstat.us",
-    url: () => "https://api.mcsrvstat.us/3/" + SERVER.ip,
+    url: () => bust("https://api.mcsrvstat.us/3/" + SERVER.ip),
     parse: (d) => ({
       online: d.online,
       players: d.players && d.players.online,
@@ -36,13 +54,26 @@ const STATUS_SOURCES = [
   },
   {
     name: "mcstatus.io",
-    url: () => "https://api.mcstatus.io/v2/status/java/" + SERVER.ip,
+    url: () => bust("https://api.mcstatus.io/v2/status/java/" + SERVER.ip),
     parse: (d) => ({
       online: d.online,
       players: d.players && d.players.online,
       max: d.players && d.players.max,
       version: d.version && d.version.name_clean,
       motd: d.motd && d.motd.clean,
+    }),
+  },
+  {
+    // 注意：这个源离线时也返回 HTTP 200，只是 body 变成 {"error": "..."}，
+    // 所以只能靠"有没有 players.online"来判断，不能看状态码。
+    name: "minetools.eu",
+    url: () => bust("https://api.minetools.eu/ping/" + HOST_PORT[0] + "/" + HOST_PORT[1]),
+    parse: (d) => ({
+      online: Boolean(d.players && typeof d.players.online === "number"),
+      players: d.players && d.players.online,
+      max: d.players && d.players.max,
+      version: d.version && d.version.name,
+      motd: stripColorCodes(d.description),
     }),
   },
 ];
@@ -107,6 +138,8 @@ function applyStaticStatus(state = "unknown", note = "no data") {
   });
 }
 
+/* 探测单个数据源。返回 null 表示"这个源没给我有效答案"（超时/被墙/格式异常），
+ * 注意区分"没答案"和"明确回答离线"——两者含义完全不同。 */
 async function probe(source) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), SERVER.timeoutMs);
@@ -115,39 +148,49 @@ async function probe(source) {
     clearTimeout(timer);
     if (!res.ok) return null;
     const data = await res.json();
-    if (!data || data.online === undefined) return null;
-    return source.parse(data);
+    if (!data || typeof data !== "object") return null;
+    const parsed = source.parse(data);
+    if (typeof parsed.online !== "boolean") return null; // 拿不到明确结论就不参与投票
+    parsed.via = source.name;
+    if (window.console && console.debug) console.debug("[status]", source.name, data);
+    return parsed;
   } catch {
     clearTimeout(timer);
-    return null; // 超时 / 被墙 / 解析失败，换下一个源
+    return null;
   }
 }
 
+/* 三个源并行查询 + 投票：
+ * 任何一个源确认在线 → ONLINE（防止单个边缘节点的坏缓存误判宕机）
+ * 全部源都明确回答离线 → OFFLINE（这个结论可信）
+ * 全部源都拿不到答案 → NO SIGNAL（无法验证，不假装在线） */
 async function fetchLiveStatus() {
   renderStatus({ state: "checking", note: "checking", players: undefined, max: SERVER.max });
 
-  for (const source of STATUS_SOURCES) {
-    const result = await probe(source);
-    if (!result) continue;
+  const answered = (await Promise.all(STATUS_SOURCES.map(probe))).filter(Boolean);
+  const agree = answered.length + "/" + STATUS_SOURCES.length;
 
-    if (result.online) {
-      renderStatus({
-        state: "online",
-        note: "via " + source.name,
-        players: result.players,
-        max: result.max,
-        version: result.version,
-        // 优先显示服务器真实 MOTD（可能带季节活动文案），取不到再用本地配置
-        motd: result.motd || SERVER.motd,
-      });
-    } else {
-      // 明确离线：人数未知，版本号保留已知配置
-      renderStatus({ state: "offline", note: "via " + source.name, players: null, version: SERVER.version });
-    }
-    return true;
+  const live = answered.find((r) => r.online === true);
+  if (live) {
+    renderStatus({
+      state: "online",
+      note: agree + " sources agree",
+      players: live.players,
+      max: live.max,
+      version: live.version,
+      // 优先显示服务器真实 MOTD（可能带季节活动文案），取不到再用本地配置
+      motd: live.motd || SERVER.motd,
+    });
+    return;
   }
+
+  if (answered.length > 0) {
+    // 所有能访问到的源都说离线，可以采信
+    renderStatus({ state: "offline", note: agree + " sources agree", players: null, version: SERVER.version });
+    return;
+  }
+
   applyStaticStatus("unknown", "sources unreachable");
-  return false;
 }
 
 applyStaticStatus("checking", "waiting");
