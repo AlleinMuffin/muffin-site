@@ -9,12 +9,12 @@
  * silently fall back to these static values when it fails.
  * ------------------------------------------------------------------------ */
 const SERVER = {
-  name: "Muffin Server",
-  ip: "play.example.com",
-  version: "1.20.x",
-  players: 7,
-  max: 50,
-  motd: "a small world, big ideas",
+  name: "Mechanomania Aeronautics",
+  ip: "play.simpfun.cn:32883", // 自定义端口，和 IP 一起显示、一起复制
+  version: "1.21.1",
+  players: 0,
+  max: 20,
+  motd: "Mechanomania Aeronautics",
   liveStatus: true, // set false to skip the online lookup entirely
 };
 
@@ -44,6 +44,8 @@ function renderStatus({ online, players, max, version, motd }) {
     const pct = Math.min(100, Math.round((players / max) * 100));
     const fill = $(".bar__fill");
     if (fill) fill.style.setProperty("--pct", pct + "%");
+    const bar = $(".stat--players .bar");
+    if (bar) bar.setAttribute("aria-label", "玩家占用 " + players + " / " + max);
   }
   const checked = $("#status-checked");
   if (checked) {
@@ -78,7 +80,8 @@ async function fetchLiveStatus() {
       players: data.players ? data.players.online : undefined,
       max: data.players ? data.players.max : undefined,
       version: data.version || undefined,
-      motd: SERVER.motd, // keep our own tagline, mcsrvstat motd is noisy
+      // 优先显示服务器真实 MOTD（可能带季节活动文案），取不到再用本地配置
+      motd: (data.motd && data.motd.clean && data.motd.clean[0]) || SERVER.motd,
     });
   } catch {
     /* offline / timeout -> static values already on screen */

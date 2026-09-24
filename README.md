@@ -27,9 +27,20 @@ python -m http.server 8000
 
 ## 改成你的真实信息
 
-- `assets/js/main.js` 顶部的 `SERVER` 对象：`ip`、`version`、`players/max`、`motd`、
-  以及 `liveStatus`（为 `true` 时会请求 `api.mcsrvstat.us` 读取实时状态，失败自动回落静态值）。
-  **当前仍是占位值 `play.example.com`，上线前务必改掉。**
+- `assets/js/main.js` 顶部的 `SERVER` 对象（当前已填入真实值）：
+
+  | 字段 | 当前值 |
+  | --- | --- |
+  | `name` | Mechanomania Aeronautics |
+  | `ip` | `play.simpfun.cn:32883`（带自定义端口，和 IP 一起显示、一起复制） |
+  | `version` | 1.21.1 |
+  | `players` / `max` | 静态兜底值（0 / 20） |
+  | `motd` | Mechanomania Aeronautics |
+  | `liveStatus` | `true` |
+
+  `liveStatus: true` 时页面会请求 `api.mcsrvstat.us` 读取真实在线状态；该接口的 `"online"`、
+  `"version"`、`"players"`、`"motd.clean[0]"` 四个字段都会被用到，取不到时静默回落到上面的静态值，
+  所以即使接口被墙也不会白屏。带端口的地址接口是支持的（`IP:端口` 直接拼在 URL 里即可）。
 - Projects 区的下载链接目前是 `href="#"` 占位，指向你的 Release 页即可。
 - GitHub 链接已接入真实账号 `AlleinMuffin`：
   - 导航栏 / Hero / GitHub 区 → <https://github.com/AlleinMuffin>
