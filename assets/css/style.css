@@ -514,6 +514,12 @@ section { scroll-margin-top: calc(var(--nav-h) + 16px); }
   background: rgba(255, 92, 92, 0.08);
   color: var(--danger);
 }
+/* 查询不到时的中间态：不代表宕机，只是无法验证 */
+.status-pill.is-pending {
+  border-color: rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.08);
+  color: #fbbf24;
+}
 
 .status-pill__dot {
   width: 8px;

@@ -5,8 +5,8 @@
 
 /* --------------------------------------------------------------------------
  * Edit this block to plug in your real server / links.
- * If `liveStatus` is true the page will try api.mcsrvstat.us first and
- * silently fall back to these static values when it fails.
+ * 实时状态会依次尝试 STATUSES 里的多个数据源，全部失败才回落到这里的静态值
+ * （此时胶囊显示 NO SIGNAL，不会伪装成 ONLINE）。
  * ------------------------------------------------------------------------ */
 const SERVER = {
   name: "Mechanomania Aeronautics",
@@ -16,7 +16,36 @@ const SERVER = {
   max: 20,
   motd: "Mechanomania Aeronautics",
   liveStatus: true, // set false to skip the online lookup entirely
+  refreshMs: 60000, // 自动刷新间隔
+  timeoutMs: 5000, // 单个数据源的超时上限
 };
+
+/* 多个状态数据源：按顺序尝试，任何一个给出确定结果就停止。
+ * 这样即使某个接口在某个网络环境下被墙或抽风，也能拿到真实状态。 */
+const STATUS_SOURCES = [
+  {
+    name: "mcsrvstat.us",
+    url: () => "https://api.mcsrvstat.us/3/" + SERVER.ip,
+    parse: (d) => ({
+      online: d.online,
+      players: d.players && d.players.online,
+      max: d.players && d.players.max,
+      version: d.version,
+      motd: d.motd && d.motd.clean && d.motd.clean[0],
+    }),
+  },
+  {
+    name: "mcstatus.io",
+    url: () => "https://api.mcstatus.io/v2/status/java/" + SERVER.ip,
+    parse: (d) => ({
+      online: d.online,
+      players: d.players && d.players.online,
+      max: d.players && d.players.max,
+      version: d.version && d.version.name_clean,
+      motd: d.motd && d.motd.clean,
+    }),
+  },
+];
 
 /* --------------------------------------------------------------------------
  * Small helpers
@@ -29,68 +58,113 @@ const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matc
 /* --------------------------------------------------------------------------
  * Server status (static values + optional live lookup)
  * ------------------------------------------------------------------------ */
-function renderStatus({ online, players, max, version, motd }) {
+function renderStatus({ state, players, max, version, motd, note }) {
   const pill = $("#status-pill");
   const statusText = $("#status-text");
+
   if (pill && statusText) {
-    pill.classList.toggle("is-offline", !online);
-    statusText.textContent = online ? "ONLINE" : "OFFLINE";
+    pill.classList.toggle("is-offline", state === "offline");
+    pill.classList.toggle("is-pending", state === "checking" || state === "unknown");
+    pill.dataset.state = state;
+    statusText.textContent =
+      state === "online" ? "ONLINE" : state === "offline" ? "OFFLINE" : state === "checking" ? "CHECKING" : "NO SIGNAL";
   }
-  if (players !== undefined) $("#stat-players").textContent = String(players);
-  if (max !== undefined) $("#stat-max").textContent = String(max);
+
+  // 离线时人数是未知的，显示占位符而不是上一次的旧数字，避免"写着离线却还有人数"的矛盾
+  const unknownPlayers = state === "offline" || players === undefined || players === null;
+  $("#stat-players").textContent = unknownPlayers ? "–" : String(players);
+  $("#stat-max").textContent = String(max !== undefined && max !== null ? max : SERVER.max);
   if (version) $("#stat-version").textContent = version;
   if (motd) $("#stat-motd").textContent = motd;
-  if (players !== undefined && max) {
-    const pct = Math.min(100, Math.round((players / max) * 100));
-    const fill = $(".bar__fill");
-    if (fill) fill.style.setProperty("--pct", pct + "%");
-    const bar = $(".stat--players .bar");
-    if (bar) bar.setAttribute("aria-label", "玩家占用 " + players + " / " + max);
+
+  const fill = $(".bar__fill");
+  const bar = $(".stat--players .bar");
+  const pct = unknownPlayers ? 0 : Math.min(100, Math.round((players / (max || SERVER.max)) * 100));
+  if (fill) fill.style.setProperty("--pct", pct + "%");
+  if (bar) {
+    bar.setAttribute(
+      "aria-label",
+      unknownPlayers ? "服务器离线，人数未知" : "玩家占用 " + players + " / " + (max || SERVER.max)
+    );
   }
+
   const checked = $("#status-checked");
   if (checked) {
     const t = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    checked.textContent = "updated " + t;
+    checked.textContent = note ? note + " · " + t : "updated " + t;
   }
 }
 
-function applyStaticStatus() {
+/* 数据源全部不可用时的兜底：保留静态值，但明确标注"未经验证" */
+function applyStaticStatus(state = "unknown", note = "no data") {
   renderStatus({
-    online: true,
-    players: SERVER.players,
-    max: SERVER.max,
+    state,
+    note,
     version: SERVER.version,
     motd: SERVER.motd,
+    max: SERVER.max,
+    players: SERVER.players,
   });
 }
 
-async function fetchLiveStatus() {
+async function probe(source) {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 6000);
+  const timer = setTimeout(() => ctrl.abort(), SERVER.timeoutMs);
   try {
-    const res = await fetch("https://api.mcsrvstat.us/3/" + encodeURIComponent(SERVER.ip), {
-      signal: ctrl.signal,
-    });
+    const res = await fetch(source.url(), { signal: ctrl.signal, cache: "no-store" });
     clearTimeout(timer);
-    if (!res.ok) return;
+    if (!res.ok) return null;
     const data = await res.json();
-    if (!data || data.online === undefined) return;
-    renderStatus({
-      online: Boolean(data.online),
-      players: data.players ? data.players.online : undefined,
-      max: data.players ? data.players.max : undefined,
-      version: data.version || undefined,
-      // 优先显示服务器真实 MOTD（可能带季节活动文案），取不到再用本地配置
-      motd: (data.motd && data.motd.clean && data.motd.clean[0]) || SERVER.motd,
-    });
+    if (!data || data.online === undefined) return null;
+    return source.parse(data);
   } catch {
-    /* offline / timeout -> static values already on screen */
+    clearTimeout(timer);
+    return null; // 超时 / 被墙 / 解析失败，换下一个源
   }
 }
 
-applyStaticStatus();
+async function fetchLiveStatus() {
+  renderStatus({ state: "checking", note: "checking", players: undefined, max: SERVER.max });
+
+  for (const source of STATUS_SOURCES) {
+    const result = await probe(source);
+    if (!result) continue;
+
+    if (result.online) {
+      renderStatus({
+        state: "online",
+        note: "via " + source.name,
+        players: result.players,
+        max: result.max,
+        version: result.version,
+        // 优先显示服务器真实 MOTD（可能带季节活动文案），取不到再用本地配置
+        motd: result.motd || SERVER.motd,
+      });
+    } else {
+      // 明确离线：人数未知，版本号保留已知配置
+      renderStatus({ state: "offline", note: "via " + source.name, players: null, version: SERVER.version });
+    }
+    return true;
+  }
+  applyStaticStatus("unknown", "sources unreachable");
+  return false;
+}
+
+applyStaticStatus("checking", "waiting");
 if (SERVER.liveStatus && navigator.onLine) {
   fetchLiveStatus();
+
+  if (SERVER.refreshMs > 0) {
+    setInterval(() => {
+      if (document.hidden) return; // 标签页不可见时不浪费请求
+      fetchLiveStatus();
+    }, SERVER.refreshMs);
+
+    // 重新回到页面时，如果离开得比较久就立刻刷新一次
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) fetchLiveStatus();
+    });
+  }
 }
 
 /* --------------------------------------------------------------------------
