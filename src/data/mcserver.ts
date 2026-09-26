@@ -15,7 +15,6 @@ export interface Announcement {
 
 export const announcements: Announcement[] = [
   { date: "2026-09-26", text: "站点迁到 Cloudflare Pages，代码推送后自动部署；模组清单已同步到 192 个。" },
-  { date: "2026-09-20", text: "主城周边区块已预生成，跑图不再触发实时生成。" },
   { date: "2026-08-17", text: "启动器 alpha-v1.1：暂时移除自动探测，新增「帮助」按钮。" },
 ];
 

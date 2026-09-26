@@ -90,15 +90,20 @@ const mc = siteConfig.mc;
       </div>
 
       <div class="panel" data-reveal>
-        <h3 class="panel__title">模组更新检测</h3>
+        <h3 class="panel__title">模组怎么同步</h3>
         <p class="panel__desc">
-          用 Muffin Launcher 或下面的命令比对本地与服务器的模组差异，只下载变化的部分。
+          玩家侧用 Muffin Launcher（当前 alpha-v1.1）的手动模式：双击运行 → 选手动模式 →
+          指定 <code>HMCL.exe</code> 与游戏目录里的 <code>mods</code> 文件夹 → 点启动，
+          本地模组就会对齐到服务器端。
+        </p>
+        <p class="panel__desc" style="margin-top:12px">
+          服务端清单放在整合包仓库的 <code>mods/</code> 目录，本页这份列表由脚本自动同步，
+          仓库里增删模组后重跑一次即可。
         </p>
         <div class="terminal" style="margin-top:18px">
           <div class="terminal__bar"><span></span><span></span><span></span></div>
-          <pre class="terminal__body mono">$ muffin check --server {mc.host} --profile latest
-<i>✔</i> {modCount} mods 已同步
-<i>!</i> 0 mods 需要更新</pre>
+          <pre class="terminal__body mono">$ python tools/sync-mods.py --repo AlleinMuffin/Muffin-s-ModPack-Mod-Updated
+<i>✔</i> {modCount} mods 写入 src/data/mods.ts</pre>
         </div>
       </div>
 
