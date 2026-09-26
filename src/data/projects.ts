@@ -38,19 +38,6 @@ export const projects: Project[] = [
     ],
   },
   {
-    slug: "industry-craft",
-    name: "IndustryCraft Modpack",
-    description: "以机械与航空为主题的 1.21.1 NeoForge 整合包，服务器正在跑的就是它。",
-    tags: ["整合包", "Mod"],
-    version: "1.21.1",
-    github: `${GITHUB_HOME}/IndustryCraft-1.21.1-NeoForge`,
-    body: [
-      "IndustryCraft 是 Mechanomania Aeronautics 服务器当前使用的整合包，基于 NeoForge 1.21.1。",
-      "核心是机械自动化与航空：从最基础的动力开始，一路做到自动产线、飞行器和跨维度物流。",
-      "整合包配置与模组清单都放在仓库里，玩家可以直接对照排查本地环境问题。",
-    ],
-  },
-  {
     slug: "ai-toolbox",
     name: "AI Toolbox",
     description: "一组顺手的 AI 小工具：把日常重复的文本与数据处理流程脚本化。",
