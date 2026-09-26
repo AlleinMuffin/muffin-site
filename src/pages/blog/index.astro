@@ -1,0 +1,48 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SectionHead from "../../components/SectionHead.astro";
+import { getCollection } from "astro:content";
+import { siteConfig } from "../../config/site";
+
+const posts = (await getCollection("blog", ({ data }) => data.draft !== true)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" });
+---
+
+<BaseLayout title={`开发日志 — ${siteConfig.siteName}`} description="开发过程中的记录、踩坑与思考。">
+  <section class="page-hero">
+    <div class="page-hero__media" aria-hidden="true"></div>
+    <div class="container page-hero__inner">
+      <p class="page-hero__label">Dev Log</p>
+      <h1 class="page-hero__title">开发日志</h1>
+      <p class="page-hero__desc">服务器运维、工具开发与踩坑记录。新增文章 = 在 src/content/blog/ 放一个 Markdown。</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <SectionHead label="All Posts" title={`共 ${posts.length} 篇`} />
+
+      <div class="post-list">
+        {
+          posts.map((post) => (
+            <a class="post-row" href={`/blog/${post.id}`} data-reveal>
+              <span class="post-row__date mono">{fmtDate(post.data.pubDate)}</span>
+              <span class="post-row__title">{post.data.title}</span>
+              <span class="post-row__desc">{post.data.description}</span>
+            </a>
+          ))
+        }
+      </div>
+
+      {
+        posts.length === 0 && (
+          <p class="section__desc">还没有文章。在 src/content/blog/ 里新建 .md 就会出现在这里。</p>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>

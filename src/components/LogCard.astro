@@ -1,0 +1,19 @@
+---
+/** 首页「DEV LOG」用的日志卡。 */
+interface Props {
+  date: string;
+  title: string;
+  description: string;
+  href: string;
+  delay?: number;
+}
+
+const { date, title, description, href, delay = 0 } = Astro.props;
+---
+
+<a class="log-card" href={href} data-reveal style={`--d:${delay}s`}>
+  <span class="log-card__date mono">{date}</span>
+  <h4 class="log-card__title">{title}</h4>
+  <p class="log-card__desc">{description}</p>
+  <span class="log-card__more">阅读 <span aria-hidden="true">→</span></span>
+</a>

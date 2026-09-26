@@ -1,0 +1,21 @@
+---
+/** 页脚：系统状态 + 版权 + 快捷导航。绿色圆点轻微呼吸。 */
+import { siteConfig } from "../config/site";
+---
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <p class="footer__status mono">
+      <span class="status-pill__dot status-pill__dot--sm" aria-hidden="true"></span>
+      <span>SYSTEM STATUS · ALL SYSTEMS OPERATIONAL</span>
+    </p>
+    <p class="footer__copy">{siteConfig.footer.copyright} · {siteConfig.footer.signature}</p>
+    <nav class="footer__nav mono" aria-label="页脚导航">
+      <a href="/mcserver">Server</a>
+      <a href="/projects">Projects</a>
+      <a href="/blog">Blog</a>
+      <a href="/about">About</a>
+      <a href={siteConfig.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    </nav>
+  </div>
+</footer>

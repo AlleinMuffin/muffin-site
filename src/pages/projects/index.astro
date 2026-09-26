@@ -1,0 +1,81 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SectionHead from "../../components/SectionHead.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+import { projects, featuredProject, allTags } from "../../data/projects";
+import { siteConfig } from "../../config/site";
+---
+
+<BaseLayout title={`项目与工具 — ${siteConfig.siteName}`} description="启动器、整合包、AI 小工具与运维脚本。">
+  <section class="page-hero">
+    <div class="page-hero__media" aria-hidden="true"></div>
+    <div class="container page-hero__inner">
+      <p class="page-hero__label">Projects</p>
+      <h1 class="page-hero__title">项目与工具</h1>
+      <p class="page-hero__desc">启动器、整合包、AI 小工具与运维脚本 —— 数据驱动，新增项目只需加一条数据。</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <SectionHead label="Featured" title="主推项目" />
+      <article class="featured" data-reveal>
+        <div class="featured__body">
+          <p class="featured__kicker mono">FEATURED PROJECT</p>
+          <h3 class="featured__title">{featuredProject.name}</h3>
+          <p class="featured__desc">{featuredProject.description}</p>
+          <div class="featured__tags">
+            {featuredProject.version && <span class="tag mono">{featuredProject.version}</span>}
+            {featuredProject.tags.map((t) => <span class="tag">{t}</span>)}
+          </div>
+          <div class="featured__actions">
+            <a class="btn btn--primary" href={`/projects/${featuredProject.slug}`}>查看详情</a>
+            <a
+              class="btn btn--ghost"
+              href={featuredProject.github ?? siteConfig.github}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="all">
+    <div class="container">
+      <SectionHead label="All Projects" title="全部项目" desc="按标签筛选。" />
+
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-btn is-active" type="button" data-filter="all">All</button>
+        {allTags.map((t) => <button class="filter-btn" type="button" data-filter={t}>{t}</button>)}
+      </div>
+
+      <div class="project-grid" id="project-grid">
+        {projects.map((p) => <ProjectCard project={p} />)}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // 标签筛选：纯前端过滤，不需要重新请求页面
+  const bar = document.querySelector<HTMLElement>("#filter-bar");
+  const grid = document.querySelector<HTMLElement>("#project-grid");
+  if (bar && grid) {
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>("[data-tags]"));
+    bar.addEventListener("click", (e) => {
+      const btn = (e.target as HTMLElement | null)?.closest<HTMLElement>("[data-filter]");
+      if (!btn) return;
+      const tag = btn.dataset.filter || "all";
+      bar.querySelectorAll("[data-filter]").forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      cards.forEach((card) => {
+        const tags = (card.dataset.tags || "").split("|");
+        card.hidden = tag !== "all" && !tags.includes(tag);
+      });
+    });
+  }
+</script>

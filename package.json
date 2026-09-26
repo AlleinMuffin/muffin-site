@@ -1,0 +1,22 @@
+{
+  "name": "muffinlab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MuffinLab — 以 Minecraft 服务器为视觉核心，承载项目、工具与开发日志的个人门户。",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlleinMuffin/muffin-site.git"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "astro": "^7.3.5"
+  }
+}

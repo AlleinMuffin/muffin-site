@@ -1,0 +1,130 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SectionHead from "../../components/SectionHead.astro";
+import ServerStatusCard from "../../components/ServerStatusCard.astro";
+import Gallery from "../../components/Gallery.astro";
+import { siteConfig } from "../../config/site";
+import { mods, announcements, rules, joinSteps } from "../../data/mcserver";
+
+const mc = siteConfig.mc;
+---
+
+<BaseLayout title={`${mc.name} — ${siteConfig.siteName}`} description={mc.intro}>
+  <!-- ========================= 头部大图 ========================= -->
+  <section class="page-hero">
+    <div class="page-hero__media" aria-hidden="true"></div>
+    <div class="container page-hero__inner">
+      <p class="page-hero__label">Minecraft Server</p>
+      <h1 class="page-hero__title">{mc.name}</h1>
+      <p class="page-hero__desc">{mc.intro}</p>
+      <div class="page-hero__actions">
+        <a class="btn btn--primary" href="#join">加入服务器</a>
+        <a class="btn btn--ghost" href="/">返回首页 <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= 状态卡片 ========================= -->
+  <section class="section" id="status">
+    <div class="container">
+      <SectionHead label="Server Status" title="实时状态" desc="版本、在线人数与 MOTD 每 60 秒自动刷新。" />
+      <ServerStatusCard showHint={false} />
+    </div>
+  </section>
+
+  <!-- ==================== 模组 / 公告 / 规则 ==================== -->
+  <section class="section" id="mods">
+    <div class="container">
+      <SectionHead label="Modpack" title="模组清单" desc="当前整合包的主要模组。完整清单见整合包仓库。" />
+
+      <div class="panel" data-reveal>
+        <h3 class="panel__title">模组列表</h3>
+        <p class="panel__desc">版本随整合包更新而变动，以仓库里的 manifest 为准。</p>
+        <div class="mod-list">
+          {
+            mods.map((m) => (
+              <div class="mod-item">
+                <span class="mod-item__name">{m.name}</span>
+                <span class="mod-item__ver">{m.version}</span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="panel" data-reveal>
+        <h3 class="panel__title">模组更新检测</h3>
+        <p class="panel__desc">
+          用 Muffin Launcher 或下面的命令比对本地与服务器的模组差异，只下载变化的部分。
+        </p>
+        <div class="terminal" style="margin-top:18px">
+          <div class="terminal__bar"><span></span><span></span><span></span></div>
+          <pre class="terminal__body mono">$ muffin check --server {mc.host} --profile latest
+<i>✔</i> 128 mods 已同步
+<i>!</i> 3 mods 需要更新</pre>
+        </div>
+      </div>
+
+      <div class="panel" data-reveal>
+        <h3 class="panel__title">公告</h3>
+        <div class="notice-list">
+          {
+            announcements.map((n) => (
+              <div class="notice">
+                <div class="notice__date mono">{n.date}</div>
+                <div class="notice__text">{n.text}</div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="panel" data-reveal>
+        <h3 class="panel__title">规则</h3>
+        <div class="rules">
+          {
+            rules.map((r) => (
+              <p class="rule">
+                <span class="rule__dot" aria-hidden="true" />
+                <span>{r}</span>
+              </p>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================== 加入指南 ========================== -->
+  <section class="section" id="join">
+    <div class="container">
+      <SectionHead label="How to Join" title="加入指南" desc="四步进服，遇到问题可以在 GitHub 提 Issue。" />
+      <div class="panel" data-reveal>
+        <div class="steps">
+          {
+            joinSteps.map((s, i) => (
+              <div class="step">
+                <span class="step__no">{i + 1}</span>
+                <p class="step__body" set:html={s.replace("{host}", mc.host)} />
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================== 完整相册 ========================== -->
+  <section class="section" id="gallery">
+    <div class="container">
+      <SectionHead label="Gallery" title="世界图鉴（完整版）" desc="点击任意图片放大，支持左右切换与 Esc 关闭。" />
+      <Gallery />
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <p><a class="btn btn--ghost" href="/">返回首页 <span aria-hidden="true">→</span></a></p>
+    </div>
+  </section>
+</BaseLayout>

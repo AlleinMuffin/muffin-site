@@ -1,0 +1,19 @@
+---
+/** 区块标题（小标签 + 标题 + 可选描述）。 */
+interface Props {
+  label: string;
+  title: string;
+  desc?: string;
+}
+
+const { label, title, desc } = Astro.props;
+---
+
+<header class="section__head" data-reveal>
+  <p class="section__label">
+    <span class="section__label-dot" aria-hidden="true"></span>
+    {label}
+  </p>
+  <h2 class="section__title">{title}</h2>
+  {desc && <p class="section__desc">{desc}</p>}
+</header>

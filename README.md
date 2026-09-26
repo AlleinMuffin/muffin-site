@@ -1,144 +1,128 @@
-# MUFFIN — Server & Projects Portal
+# MuffinLab
 
-深色、克制的个人服务器门户。以服务器世界截图为视觉核心，用开发者 UI 语言包装。
+> MuffinLab 是一个属于 Muffin 的个人门户：以 Minecraft 服务器为视觉核心，
+> 同时承载项目、工具、博客与开发日志。
 
-## 本地预览
+- 站点：`MuffinLab`　个人品牌：`Muffin`
+- MC 服务器：`Mechanomania Aeronautics`
+- 技术栈：**Astro**（静态输出，零 JS 默认）+ 原生 CSS 设计系统 + Markdown 内容集合
 
-直接双击 `index.html` 即可；推荐起一个本地服务以获得完整体验：
+---
+
+## 目录结构
+
+```
+src/
+  config/site.ts        ★ 全站唯一配置源（域名 / MC 地址 / GitHub / 导航）
+  data/
+    projects.ts         项目数据（新增项目只改这里）
+    gallery.ts          相册数据
+    mcserver.ts         /mcserver 的模组 / 公告 / 规则 / 加入步骤
+  content/blog/*.md     开发日志（新增文章 = 新建一个 .md）
+  components/           Navbar / Footer / ServerStatusCard / Gallery / 各卡片
+  layouts/BaseLayout    head 元数据 + 导航 + 页脚 + 交互脚本
+  pages/                index, mcserver, projects, blog, about
+  scripts/              nav / reveal / lightbox / copy-ip / mc-status
+  styles/global.css     设计系统（配色 token + 组件样式）
+public/
+  gallery/*.svg         服务器截图（占位图，可替换）
+  fonts/*.woff2         自托管 Inter / JetBrains Mono
+```
+
+## 本地开发
 
 ```bash
-python -m http.server 8000
-# 打开 http://localhost:8000
+npm install
+npm run dev      # http://localhost:4321
+npm run build    # 输出到 dist/
+npm run preview  # 预览构建产物
 ```
 
-## 把占位图换成你自己的截图（最重要）
+## ★ 换域名 / 换 MC 地址 / 换 GitHub
 
-当前 `assets/img/` 里的图是脚本生成的像素风占位图（`tools/gen-art.py`），替换方式：
+**只需要改 `src/config/site.ts`**，页面和组件一行都不用动 —— 站内全部使用根相对路径
+（`/mcserver` 这种），域名只出现在 canonical / OG 这类**必须绝对**的元数据里。
 
-| 位置 | 文件 | 建议尺寸 |
-| --- | --- | --- |
-| Hero 背景 | `assets/img/hero.svg` → 换成 `hero.jpg/png` | ≥1920×1080，暗色/夜景最佳 |
-| Gallery 六宫格 | `assets/img/gallery-0X.svg` → `gallery-0X.jpg/png` | 横图 16:10 左右 |
-
-替换后同步改两处引用：
-
-1. `assets/css/style.css` 中 `.hero__media` 的 `background: url("../img/hero.svg")`
-2. `index.html` Gallery 区每个 `<img src>` 与 `data-full`
-
-## 改成你的真实信息
-
-- `assets/js/main.js` 顶部的 `SERVER` 对象（当前已填入真实值）：
-
-  | 字段 | 当前值 |
-  | --- | --- |
-  | `name` | Mechanomania Aeronautics |
-  | `ip` | `play.simpfun.cn:32883`（带自定义端口，和 IP 一起显示、一起复制） |
-  | `version` | 1.21.1 |
-  | `players` / `max` | 静态兜底值（0 / 20） |
-  | `motd` | Mechanomania Aeronautics |
-  | `liveStatus` | `true` |
-
-  `liveStatus: true` 时页面会请求 `api.mcsrvstat.us` 读取真实在线状态；该接口的 `"online"`、
-  `"version"`、`"players"`、`"motd.clean[0]"` 四个字段都会被用到，取不到时静默回落到上面的静态值，
-  所以即使接口被墙也不会白屏。带端口的地址接口是支持的（`IP:端口` 直接拼在 URL 里即可）。
-- Projects 区的下载链接目前是 `href="#"` 占位，指向你的 Release 页即可。
-- GitHub 链接已接入真实账号 `AlleinMuffin`：
-  - 导航栏 / Hero / GitHub 区 → <https://github.com/AlleinMuffin>
-  - 主项目卡 Muffin Launcher → `Muffin-s-ModPack-Mod-Updated` 仓库
-  - Server Tools / Datapack Experiments 两张卡**暂无对应仓库**，暂时指向主页，
-    `index.html` 里已留 `TODO` 注释，仓库建好后替换 `href` 即可。
-
-## 技术说明
-
-- 纯静态三件套（HTML/CSS/JS），无构建步骤、无依赖。
-- 字体策略：Inter / JetBrains Mono 以 woff2 自托管在 `assets/fonts/`（8 个文件共 ~182KB），
-  首屏用到的三个字重加了 `<link rel="preload">`；中文走系统字体栈（PingFang SC / 微软雅黑 /
-  Noto Sans SC），零下载。**不依赖任何外部 CDN**，国内网络下也能立即渲染。
-  若确实需要统一的中文呈现（例如 Linux 访客较多），可按同样方式自托管 Noto Sans SC 的子集文件。
-- 动效全部克制：Hero 淡入上移、Scroll Reveal 600ms、卡片 hover 上浮 4px、在线点呼吸；
-  `prefers-reduced-motion` 下全部关闭。
-- 服务器状态：`assets/js/main.js` 的 `STATUS_SOURCES` 会依次尝试多个数据源
-  （`api.mcsrvstat.us` → `api.mcstatus.io`），任一返回确定结果即采用，避免单源被墙或抽风。
-  显示四态：`ONLINE` / `OFFLINE` / `CHECKING` / `NO SIGNAL`。查不到时**不会**伪装成在线；
-  服务器离线时人数显示 `–` 而不是上一次的旧数字。默认 60 秒自动刷新，标签页不可见时跳过。
-- 无障碍：Lightbox 支持 Esc / ←→ / 焦点圈定，复制按钮有 aria-label，对比度达 WCAG AA。
-
-## 上线与版本管理
-
-- 当前线上地址：<https://muffin-server.app.workbuddy.host/>
-- 管理入口：**设置 — 数据管理 — 应用**
-- 本目录已初始化 Git 仓库并做了首次提交（`core.autocrlf=false`，源文件统一 LF）。
-- **重要**：修改文件属于本地改动，不会自动同步到线上。要更新线上内容，需要显式再发布一次，
-  链接保持不变但线上现有内容会被覆盖。
-- 远端仓库：<https://github.com/AlleinMuffin/muffin-site>（分支 `main`，已与本地同步）
-- 日常改动流程：
+也可以用环境变量覆盖（适合 Cloudflare Pages 的构建配置）：
 
 ```bash
-git add -A
-git commit -m "描述这次改了什么"
-git push                 # 推 GitHub，做异地备份
-# 想让改动出现在 muffin-server.app.workbuddy.host 上，还需要再发布一次
+PUBLIC_SITE_URL=https://你的域名       # 网站地址
+PUBLIC_MC_HOST=你的真实MC地址           # MC 服务器地址（和网站域名是两回事）
+PUBLIC_GITHUB_URL=https://github.com/你 # GitHub 主页
 ```
 
-- 站点是纯静态的，所以换托管平台零成本——这份源码推到任何支持静态托管的平台都能重建。
+> 注意：`mc.host` 是 **MC 服务器真实地址**（如 `play.example.com:32883`），
+> 和网站域名毫无关系，状态查询永远用它。
 
-### ⚠ 改 CSS / JS 后必须递增版本号
+## 添加内容
 
-托管平台的 CDN 会**按文件路径**缓存静态资源。源文件明明已经更新，但 `assets/css/style.css`
-和 `assets/js/main.js` 这些路径仍会被下发旧内容，而且返回 `200`（只有 HTML 能正常刷新）。
-**症状**：线上表现明显是旧版本，比如代码里改过的值在页面上一分未变。
+| 想加什么 | 怎么做 |
+| --- | --- |
+| 新项目 | 在 `src/data/projects.ts` 里加一条；详情页 `/projects/<slug>` 自动生成 |
+| 新文章 | 在 `src/content/blog/` 新建 `.md`（frontmatter：title / description / pubDate / tags）；列表与详情页自动生成 |
+| 新截图 | 图片放 `public/gallery/`，改 `src/data/gallery.ts` |
+| 模组 / 公告 / 规则 | 改 `src/data/mcserver.ts` |
+| 新板块 | 在 `src/config/site.ts` 的 `nav` 加一项 + 新建 `src/pages/<路径>.astro` |
 
-因此这两个文件在 `index.html` 里的引用带了版本号，**每次改动都要 +1**：
+## MC 状态是怎么查的
 
-```html
-<link rel="stylesheet" href="assets/css/style.css?v=5" />
-<script src="assets/js/main.js?v=5" defer></script>
-```
+三个源**并行投票**，任一源确认在线即判定在线：
 
-发布后用内容校验，别只看状态码：
+1. `api.mcsrvstat.us`
+2. `api.mcstatus.io`
+3. `api.minetools.eu`
 
-```bash
-diff <(curl -s https://muffin-server.app.workbuddy.host/assets/js/main.js?v=5) assets/js/main.js
-```
+这么做的原因：这些 API 都在 CDN 后面，边缘节点会缓存某次失败探测的结果，
+访客命中该节点就会看到假的 OFFLINE。加上 URL 随机时间戳（绕过缓存）+ 多源投票后，
+单个节点的坏缓存无法一票否决。
 
-## 迁移到你自己的域名
+状态有四态，不会在没有数据时假装在线：
 
-这份源码是完全自包含的静态站点（无构建步骤、无 npm/pip 依赖、字体与图片全部本地化），
-所以换托管平台等于复制文件。**已实测**：从 GitHub 全新 clone 到本地，直接起静态服务即可正常运行。
+| 状态 | 含义 |
+| --- | --- |
+| `ONLINE` | 有源确认在线 |
+| `OFFLINE` | 所有可达的源都明确回答离线 |
+| `CHECKING` | 正在查询 |
+| `NO SIGNAL` | 三个源都连不上，无法验证 |
 
-```bash
-git clone https://github.com/AlleinMuffin/muffin-site.git
-cd muffin-site
-python -m http.server 8000     # 打开 http://127.0.0.1:8000 即可
-```
+默认 60 秒自动刷新，标签页不可见时跳过。不想发任何网络请求就把
+`site.ts` 里的 `mc.liveStatus` 设为 `false`。
 
-整个目录上传到任何支持静态托管的地方（Cloudflare Pages / GitHub Pages / Vercel / Netlify /
-自己的 Nginx / 对象存储）都能直接用，不需要改任何代码。
+## 部署到 Cloudflare Pages
 
-**唯一需要改的地方**：绑定自己的域名后，把 `index.html` 里的站点地址换成你的域名——
-搜索 `muffin-server.app.workbuddy.host`，目前有 3 处：
+1. 把本仓库推到 GitHub
+2. Cloudflare Dashboard → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**
+3. 选中本仓库，构建配置填：
 
-```html
-<link rel="canonical" href="https://你的域名/" />
-<meta property="og:url" content="https://你的域名/" />
-<meta property="og:image" content="https://你的域名/assets/img/hero.svg" />
-```
+   | 字段 | 值 |
+   | --- | --- |
+   | Framework preset | `Astro` |
+   | Build command | `npm run build` |
+   | Build output directory | `dist` |
+   | Node version | `20` 或更高（建议 22） |
 
-作用分别是：告诉搜索引擎哪个是权威页面、社交分享卡片的链接、分享卡片的缩略图。
-**`og:image` 必须是绝对地址**，写成相对路径的话微信 / Facebook / Twitter 抓不到图。
+4. 部署完成后 → **Custom domains** → 绑定 `muffinlab.dpdns.org`
+5. 如果域名已经在 Cloudflare 的 DNS 里，CNAME 会自动配置好，等证书签发即可
 
-可选的进一步建议：
+以后每次 `git push` 都会自动重新部署。
 
-- `og:image` 现在是 SVG，**部分平台（含微信）不支持 SVG 缩略图**。
-  换成真实截图时导出成 1200×630 的 JPG/PNG，分享卡片才能正常显示。
-- 顺手加 `robots.txt` 和 `sitemap.xml`，方便搜索引擎收录。
-- 运行时唯一的网络请求是服务器状态查询（三个公开 API），
-  如果你自己的服务器在国内且不想依赖它们，把 `assets/js/main.js` 里的
-  `liveStatus` 设为 `false` 即可完全静态化。
+> 仓库是纯静态输出，托管到 Vercel / Netlify / GitHub Pages / 任意 Nginx
+> 也都是同一套：`npm run build` 后把 `dist/` 传上去。
 
-## 重新生成占位图（可选）
+## 待办 / 占位内容
 
-```bash
-python tools/gen-art.py        # 生成 assets/img/*.svg
-python tools/preview.py all    # 输出 tools/preview/*.png 便于预览
-```
+- [ ] `public/gallery/` 里的 7 张图是脚本生成的像素风占位图（`python tools/gen-art.py` 可重新生成），
+      换成真实服务器截图时建议导出 **WebP**，体积能从 1.1MB 降到 200KB 以内
+- [ ] `og:image` 现在指向 SVG，**微信等平台不支持 SVG 缩略图**，换图时导出 1200×630 的 JPG/PNG
+- [ ] `src/data/mcserver.ts` 的模组清单是占位数据，需要从整合包 manifest 导入真实列表
+- [ ] `Server Tools` / `Datapack Experiments` 还没有独立仓库，暂时链接到 GitHub 主页
+- [ ] `src/config/site.ts` 的 `contact` 为空，填了才会显示联系方式区块
+- [ ] 可选：加 `robots.txt`、`sitemap.xml`（`@astrojs/sitemap`）与 RSS
+
+## 设计约束（改样式前先看）
+
+- 配色：`#08090B` 背景 / `#6EE7B7` 薄荷强调 / `#4ADE80` 在线状态
+- 薄荷绿是**唯一**核心强调色，只出现在按钮、在线状态、链接 hover 与少量图标
+- 不用大渐变、不用霓虹彩虹、不过度玻璃拟态
+- 动画克制：Hero 淡入上移 0.8s、滚动揭示 600ms、卡片 hover 上浮 4px、图片 hover 放大 1.04
+- `prefers-reduced-motion` 下所有动画关闭

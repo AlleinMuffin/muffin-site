@@ -1,0 +1,72 @@
+---
+/**
+ * 服务器状态卡片。
+ *
+ * 服务端先渲染一份静态兜底（关掉 JS 也能看到服务器名和地址），
+ * 加载完成后由 src/scripts/mc-status.ts 用真实数据覆盖。
+ * 状态有四种：ONLINE / OFFLINE / CHECKING / NO SIGNAL，
+ * 查不到时不会伪装成在线。
+ */
+import { siteConfig } from "../config/site";
+
+interface Props {
+  /** 整卡点击进入 /mcserver（点复制按钮不会触发跳转） */
+  linkToDetail?: boolean;
+  showHint?: boolean;
+}
+
+const { linkToDetail = false, showHint = true } = Astro.props;
+const mc = siteConfig.mc;
+---
+
+<article class="server-card" data-mc-status data-href={linkToDetail ? "/mcserver" : undefined}>
+  <div class="server-card__top">
+    <span class="status-pill is-pending" data-status-pill>
+      <span class="status-pill__dot" aria-hidden="true"></span>
+      <span data-status-text>CHECKING</span>
+    </span>
+    <span class="server-card__meta" data-status-meta>waiting</span>
+  </div>
+
+  <h3 class="server-card__name">
+    {
+      linkToDetail ? (
+        <a href="/mcserver">{mc.name}</a>
+      ) : (
+        mc.name
+      )
+    }
+  </h3>
+
+  <div class="server-card__ip">
+    <code class="server-card__addr" data-mc-host>{mc.host}</code>
+    <button class="btn btn--copy" type="button" data-copy-ip aria-label="复制服务器地址">
+      <span data-copy-label>Copy IP</span>
+    </button>
+  </div>
+
+  <dl class="server-card__stats">
+    <div class="stat">
+      <dt>Version</dt>
+      <dd class="mono" data-stat-version>{mc.fallback.version}</dd>
+    </div>
+    <div class="stat stat--players">
+      <dt>Players</dt>
+      <dd class="mono"><span data-stat-players>–</span> / <span data-stat-max>{mc.fallback.max}</span></dd>
+      <dd class="bar" role="img" aria-label="玩家占用">
+        <span class="bar__fill" data-bar-fill style="--pct: 0%"></span>
+      </dd>
+    </div>
+    <div class="stat">
+      <dt>MOTD</dt>
+      <dd class="stat--muted" data-stat-motd>{mc.name}</dd>
+    </div>
+  </dl>
+
+  {showHint && <p class="server-card__hint">多人游戏 → 添加服务器 → 粘贴地址，或直接 Direct Connect。</p>}
+</article>
+
+<style>
+  .server-card__name a { color: inherit; }
+  .server-card__name a:hover { color: var(--accent); }
+</style>

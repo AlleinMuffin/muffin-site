@@ -1,0 +1,48 @@
+---
+/**
+ * 悬浮半透明导航栏。滚动后加背景与毛玻璃，移动端折叠为 ☰。
+ * 链接全部相对路径，当前页面自动高亮。
+ */
+import { siteConfig } from "../config/site";
+
+const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const isActive = (href: string) => path === href || path.startsWith(href + "/");
+---
+
+<header class="nav" id="nav">
+  <div class="container nav__inner">
+    <a class="nav__logo" href="/" aria-label={`${siteConfig.siteName} 首页`}>
+      <span class="nav__dot" aria-hidden="true"></span>
+      <span class="nav__brand">{siteConfig.siteName.toUpperCase()}</span>
+    </a>
+
+    <nav class="nav__links" id="nav-links" aria-label="主导航">
+      {
+        siteConfig.nav.map((item) => (
+          <a
+            class={`nav__link${isActive(item.href) ? " is-active" : ""}`}
+            href={item.href}
+            aria-current={isActive(item.href) ? "page" : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+      <a class="nav__link" href={siteConfig.github} target="_blank" rel="noopener noreferrer">
+        GitHub <span class="nav__ext" aria-hidden="true">↗</span>
+      </a>
+    </nav>
+
+    <button
+      class="nav__toggle"
+      id="nav-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="nav-links"
+      aria-label="打开菜单"
+    >
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</header>

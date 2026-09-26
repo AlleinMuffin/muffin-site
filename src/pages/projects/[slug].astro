@@ -1,0 +1,47 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { projects } from "../../data/projects";
+import { siteConfig } from "../../config/site";
+import type { GetStaticPaths } from "astro";
+
+export const getStaticPaths = (async () => {
+  return projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}) satisfies GetStaticPaths;
+
+const { project } = Astro.props;
+const repo = project.github ?? siteConfig.github;
+---
+
+<BaseLayout title={`${project.name} — ${siteConfig.siteName}`} description={project.description}>
+  <section class="page-hero">
+    <div class="page-hero__media" aria-hidden="true"></div>
+    <div class="container page-hero__inner">
+      <p class="page-hero__label">Project</p>
+      <h1 class="page-hero__title">{project.name}</h1>
+      <p class="page-hero__desc">{project.description}</p>
+      <div class="page-hero__actions">
+        <a class="btn btn--primary" href={repo} target="_blank" rel="noopener noreferrer">
+          GitHub <span aria-hidden="true">↗</span>
+        </a>
+        {project.download && <a class="btn btn--ghost" href={project.download}>Download</a>}
+        <a class="btn btn--ghost" href="/projects">全部项目 <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="featured__tags" style="margin-bottom:28px">
+        {project.tags.map((t) => <span class="tag">{t}</span>)}
+        {project.version && <span class="tag mono">{project.version}</span>}
+      </div>
+
+      <div class="prose">
+        {project.body?.map((para) => <p>{para}</p>)}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

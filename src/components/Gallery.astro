@@ -1,0 +1,43 @@
+---
+/**
+ * 杂志式相册（1 大 + 2 小 + 2 宽的错落布局），点击开 Lightbox。
+ * Lightbox 支持 ←→ 切换、Esc 关闭、焦点圈定，逻辑在 src/scripts/lightbox.ts。
+ */
+import { gallery } from "../data/gallery";
+
+/** 布局槽位按索引循环复用，以后加图不会打乱网格 */
+const slots = ["a", "b", "c", "d", "e", "f"];
+---
+
+<div class="gallery-grid" data-reveal>
+  {
+    gallery.map((img, i) => (
+      <figure class={`g-item g-item--${slots[i % slots.length]}`}>
+        <button
+          type="button"
+          class="g-item__btn"
+          data-lightbox-open
+          data-full={img.src}
+          data-caption={img.caption}
+          aria-label={`查看大图：${img.caption}`}
+        >
+          <img src={img.src} alt={img.alt} loading="lazy" decoding="async" />
+          <span class="g-item__overlay">
+            <span class="g-item__caption">{img.caption}</span>
+            <span class="g-item__cta">View image ↗</span>
+          </span>
+        </button>
+      </figure>
+    ))
+  }
+</div>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="图片查看器" hidden>
+  <button class="lightbox__close" data-lightbox-close aria-label="关闭">&times;</button>
+  <button class="lightbox__arrow lightbox__arrow--prev" data-lightbox-prev aria-label="上一张">&#8249;</button>
+  <figure class="lightbox__stage">
+    <img data-lightbox-img src="" alt="" />
+    <figcaption class="lightbox__caption mono" data-lightbox-caption></figcaption>
+  </figure>
+  <button class="lightbox__arrow lightbox__arrow--next" data-lightbox-next aria-label="下一张">&#8250;</button>
+</div>

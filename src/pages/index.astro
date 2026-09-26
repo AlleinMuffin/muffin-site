@@ -1,0 +1,165 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHead from "../components/SectionHead.astro";
+import ServerStatusCard from "../components/ServerStatusCard.astro";
+import Gallery from "../components/Gallery.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import LogCard from "../components/LogCard.astro";
+import { getCollection } from "astro:content";
+import { siteConfig } from "../config/site";
+import { projects, featuredProject } from "../data/projects";
+
+const mc = siteConfig.mc;
+
+// 首页只取最新 3 篇（草稿不进列表）
+const posts = (await getCollection("blog", ({ data }) => data.draft !== true))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" });
+
+const otherProjects = projects.filter((p) => p.slug !== featuredProject.slug);
+---
+
+<BaseLayout>
+  <!-- ============================ HERO ============================ -->
+  <section class="hero">
+    <div class="hero__media" aria-hidden="true"></div>
+    <div class="hero__vignette" aria-hidden="true"></div>
+
+    <div class="container hero__content">
+      <h1 class="hero__title" data-hero>MUFFINLAB</h1>
+      <p class="hero__mcname" data-hero>{mc.name}</p>
+      <p class="hero__subtitle" data-hero>MINECRAFT SERVER &amp; PROJECTS</p>
+      <p class="hero__tagline" data-hero>{siteConfig.tagline}</p>
+
+      <div class="hero__actions" data-hero>
+        <a class="btn btn--primary" href="/mcserver">Explore Server</a>
+        <a class="btn btn--ghost" href={siteConfig.github} target="_blank" rel="noopener noreferrer">
+          GitHub <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </div>
+
+    <a class="hero__scroll" href="#server-status">
+      <span>Scroll</span>
+      <span class="hero__scroll-line" aria-hidden="true"></span>
+    </a>
+  </section>
+
+  <!-- ======================= SERVER STATUS ======================= -->
+  <section class="section" id="server-status">
+    <div class="container">
+      <SectionHead
+        label="Server Status"
+        title="服务器状态"
+        desc="实时在线状态、版本与人数。三个数据源并行校验，避免单点误判。"
+      />
+      <ServerStatusCard linkToDetail />
+    </div>
+  </section>
+
+  <!-- ======================= SERVER GALLERY ======================= -->
+  <section class="section" id="gallery">
+    <div class="container">
+      <SectionHead label="Server Gallery" title="世界图鉴" desc="服务器里的城市、洞穴与工程 —— 点击放大查看。" />
+      <Gallery />
+    </div>
+  </section>
+
+  <!-- ========================= PROJECTS ========================= -->
+  <section class="section" id="projects">
+    <div class="container">
+      <SectionHead label="Projects" title="项目与工具" desc="启动器、整合包、AI 小工具与运维脚本。" />
+
+      <!-- 主推项目 -->
+      <article class="featured" data-reveal>
+        <div class="featured__body">
+          <p class="featured__kicker mono">FEATURED PROJECT</p>
+          <h3 class="featured__title">{featuredProject.name}</h3>
+          <p class="featured__desc">{featuredProject.description}</p>
+          <div class="featured__tags">
+            {featuredProject.version && <span class="tag mono">{featuredProject.version}</span>}
+            {featuredProject.tags.map((t) => <span class="tag">{t}</span>)}
+          </div>
+          <div class="featured__actions">
+            {
+              featuredProject.download ? (
+                <a class="btn btn--primary" href={featuredProject.download}>Download</a>
+              ) : (
+                <a class="btn btn--primary" href={`/projects/${featuredProject.slug}`}>查看详情</a>
+              )
+            }
+            <a
+              class="btn btn--ghost"
+              href={featuredProject.github ?? siteConfig.github}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="featured__panel" aria-hidden="true">
+          <div class="terminal">
+            <div class="terminal__bar"><span></span><span></span><span></span></div>
+            <pre class="terminal__body mono">$ muffin launch --profile latest
+<i>✔</i> syncing mods ................ done
+<i>✔</i> configs up to date
+<i>✔</i> connecting {mc.host}
+<i>›</i> joined the server. have fun.</pre>
+          </div>
+        </div>
+      </article>
+
+      <!-- 其余项目：数据驱动，新增项目只改 src/data/projects.ts -->
+      <div class="project-grid">
+        {otherProjects.map((p) => <ProjectCard project={p} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== LATEST LOGS ======================== -->
+  <section class="section" id="logs">
+    <div class="container">
+      <SectionHead label="Dev Log" title="最新日志" desc="开发过程中的记录、踩坑与思考。" />
+      <div class="log-grid">
+        {
+          posts.map((post, i) => (
+            <LogCard
+              date={fmtDate(post.data.pubDate)}
+              title={post.data.title}
+              description={post.data.description}
+              href={`/blog/${post.id}`}
+              delay={i * 0.08}
+            />
+          ))
+        }
+      </div>
+      {
+        posts.length > 0 && (
+          <p style="margin-top:26px">
+            <a class="btn btn--ghost btn--sm" href="/blog">查看全部日志 <span aria-hidden="true">→</span></a>
+          </p>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- ========================== GITHUB ========================== -->
+  <section class="section section--tight" id="github">
+    <div class="container">
+      <div class="github-band" data-reveal>
+        <div>
+          <h2 class="github-band__title">{siteConfig.brand.toUpperCase()} on GitHub</h2>
+          <p class="github-band__desc">启动器、整合包、服务端工具与数据包 —— 全部开源，欢迎 Issue 与 PR。</p>
+        </div>
+        <a class="btn btn--primary" href={siteConfig.github} target="_blank" rel="noopener noreferrer">
+          View profile <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

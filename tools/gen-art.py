@@ -8,7 +8,7 @@ finished before real Minecraft screenshots are dropped in. Everything is
 deterministic (seeded) -> re-running gives identical files.
 
 Usage:  python tools/gen-art.py
-Output: assets/img/hero.svg, assets/img/gallery-01..06.svg
+Output: public/gallery/hero.svg, public/gallery/gallery-01..06.svg
 """
 
 import math
@@ -19,7 +19,9 @@ import random
 # pixel grid every scene is drawn on (scaled up in the SVG viewBox)
 # ---------------------------------------------------------------------------
 W, H = 160, 90
-OUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "img")
+OUT_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "public", "gallery"
+)
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,114 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHead from "../components/SectionHead.astro";
+import { siteConfig } from "../config/site";
+import { projects } from "../data/projects";
+
+const contact = siteConfig.contact;
+const hasContact = Boolean(contact.email || contact.discord || contact.qq);
+
+const stacks = [
+  { title: "服务端", items: ["Minecraft 1.21.1", "NeoForge", "Linux + systemd", "Spark 性能分析"] },
+  { title: "开发", items: ["TypeScript / JavaScript", "Python", "Astro", "Git"] },
+  { title: "运维", items: ["自动备份脚本", "白名单管理", "数据迁移", "定时采样监控"] },
+];
+---
+
+<BaseLayout title={`关于 ${siteConfig.brand} — ${siteConfig.siteName}`} description={`关于 ${siteConfig.brand}：服务器、项目与技术栈。`}>
+  <section class="page-hero">
+    <div class="page-hero__media" aria-hidden="true"></div>
+    <div class="container page-hero__inner">
+      <p class="page-hero__label">About</p>
+      <h1 class="page-hero__title">关于 {siteConfig.brand}</h1>
+      <p class="page-hero__desc">
+        一个爱折腾服务器和工具的开发者。{siteConfig.siteName} 是放这些东西的地方：Minecraft 服务器、AI 小工具、项目与开发日志。
+      </p>
+      <div class="page-hero__actions">
+        <a class="btn btn--primary" href={siteConfig.github} target="_blank" rel="noopener noreferrer">
+          GitHub <span aria-hidden="true">↗</span>
+        </a>
+        <a class="btn btn--ghost" href="/mcserver">看看服务器 <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <SectionHead label="Server" title="服务器历史" />
+
+      <div class="panel" data-reveal>
+        <h3 class="panel__title">{siteConfig.mc.name}</h3>
+        <p class="panel__desc">{siteConfig.mc.intro}</p>
+        <div class="steps" style="margin-top:22px">
+          <div class="step">
+            <span class="step__no">1</span>
+            <p class="step__body">从一台小机器起步，先把生存流程跑通。</p>
+          </div>
+          <div class="step">
+            <span class="step__no">2</span>
+            <p class="step__body">加入机械与航空类模组，整合包逐渐成型。</p>
+          </div>
+          <div class="step">
+            <span class="step__no">3</span>
+            <p class="step__body">做启动器和更新检测，解决"装环境比玩游戏还累"的问题。</p>
+          </div>
+          <div class="step">
+            <span class="step__no">4</span>
+            <p class="step__body">性能优化与自动运维，让服务器能长期稳定开着。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <SectionHead label="Stack" title="常用技术栈" />
+      <div class="project-grid">
+        {
+          stacks.map((s) => (
+            <div class="panel" data-reveal>
+              <h3 class="panel__title">{s.title}</h3>
+              <div class="featured__tags" style="margin-top:16px">
+                {s.items.map((i) => <span class="tag">{i}</span>)}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <SectionHead label="Projects" title="做过的项目" />
+      <div class="post-list">
+        {
+          projects.map((p) => (
+            <a class="post-row" href={`/projects/${p.slug}`} data-reveal>
+              <span class="post-row__title">{p.name}</span>
+              <span class="post-row__desc">{p.description}</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {
+    hasContact && (
+      <section class="section">
+        <div class="container">
+          <SectionHead label="Contact" title="联系方式" />
+          <div class="panel" data-reveal>
+            <div class="notice-list">
+              {contact.email && <div class="notice"><div class="notice__text">邮箱：{contact.email}</div></div>}
+              {contact.discord && <div class="notice"><div class="notice__text">Discord：{contact.discord}</div></div>}
+              {contact.qq && <div class="notice"><div class="notice__text">QQ：{contact.qq}</div></div>}
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+</BaseLayout>
