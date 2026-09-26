@@ -101,6 +101,41 @@ git push                 # 推 GitHub，做异地备份
 diff <(curl -s https://muffin-server.app.workbuddy.host/assets/js/main.js?v=5) assets/js/main.js
 ```
 
+## 迁移到你自己的域名
+
+这份源码是完全自包含的静态站点（无构建步骤、无 npm/pip 依赖、字体与图片全部本地化），
+所以换托管平台等于复制文件。**已实测**：从 GitHub 全新 clone 到本地，直接起静态服务即可正常运行。
+
+```bash
+git clone https://github.com/AlleinMuffin/muffin-site.git
+cd muffin-site
+python -m http.server 8000     # 打开 http://127.0.0.1:8000 即可
+```
+
+整个目录上传到任何支持静态托管的地方（Cloudflare Pages / GitHub Pages / Vercel / Netlify /
+自己的 Nginx / 对象存储）都能直接用，不需要改任何代码。
+
+**唯一需要改的地方**：绑定自己的域名后，把 `index.html` 里的站点地址换成你的域名——
+搜索 `muffin-server.app.workbuddy.host`，目前有 3 处：
+
+```html
+<link rel="canonical" href="https://你的域名/" />
+<meta property="og:url" content="https://你的域名/" />
+<meta property="og:image" content="https://你的域名/assets/img/hero.svg" />
+```
+
+作用分别是：告诉搜索引擎哪个是权威页面、社交分享卡片的链接、分享卡片的缩略图。
+**`og:image` 必须是绝对地址**，写成相对路径的话微信 / Facebook / Twitter 抓不到图。
+
+可选的进一步建议：
+
+- `og:image` 现在是 SVG，**部分平台（含微信）不支持 SVG 缩略图**。
+  换成真实截图时导出成 1200×630 的 JPG/PNG，分享卡片才能正常显示。
+- 顺手加 `robots.txt` 和 `sitemap.xml`，方便搜索引擎收录。
+- 运行时唯一的网络请求是服务器状态查询（三个公开 API），
+  如果你自己的服务器在国内且不想依赖它们，把 `assets/js/main.js` 里的
+  `liveStatus` 设为 `false` 即可完全静态化。
+
 ## 重新生成占位图（可选）
 
 ```bash

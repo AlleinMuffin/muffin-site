@@ -6,12 +6,17 @@
   <title>MUFFIN — Minecraft Server &amp; Projects</title>
   <meta name="description" content="Muffin 的服务器与项目空间：Minecraft 服务器状态、世界图鉴、自研工具与开源项目。" />
   <meta name="theme-color" content="#08090B" />
-  <!-- 换成正式域名后记得同步这里；canonical 用于告诉搜索引擎哪个是权威页面 -->
+  <!-- ============================================================
+       迁移到自己的域名时，只需要改下面 SITE_URL 出现的 3 处：
+       canonical / og:url / og:image（社交平台要求 og:image 必须是绝对地址，
+       写成相对路径会导致分享卡片抓不到图）
+       ============================================================ -->
   <link rel="canonical" href="https://muffin-server.app.workbuddy.host/" />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://muffin-server.app.workbuddy.host/" />
   <meta property="og:title" content="MUFFIN — Minecraft Server &amp; Projects" />
   <meta property="og:description" content="A small world built with code, blocks and ideas." />
-  <meta property="og:image" content="assets/img/hero.svg" />
+  <meta property="og:image" content="https://muffin-server.app.workbuddy.host/assets/img/hero.svg" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2308090B'/%3E%3Crect x='7' y='7' width='8' height='8' fill='%236EE7B7'/%3E%3Crect x='17' y='17' width='8' height='8' fill='%23242932'/%3E%3C/svg%3E" />
 
   <!-- 资源带版本号：托管平台的 CDN 按路径缓存静态文件，改动后不加版本号会继续下发旧版 -->
