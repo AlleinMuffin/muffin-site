@@ -17,12 +17,16 @@ src/
   data/
     projects.ts         项目数据（新增项目只改这里）
     gallery.ts          相册数据
-    mcserver.ts         /mcserver 的模组 / 公告 / 规则 / 加入步骤
+    mcserver.ts         /mcserver 的公告 / 规则 / 加入步骤
+    mods.ts             ★ 模组清单（脚本生成，不要手改）
   content/blog/*.md     开发日志（新增文章 = 新建一个 .md）
   components/           Navbar / Footer / ServerStatusCard / Gallery / 各卡片
   layouts/BaseLayout    head 元数据 + 导航 + 页脚 + 交互脚本
   pages/                index, mcserver, projects, blog, about
-  scripts/              nav / reveal / lightbox / copy-ip / mc-status
+  scripts/              nav / reveal / lightbox / copy-ip / mc-status / mod-filter
+tools/
+  sync-mods.py          ★ 从整合包仓库拉取真实模组清单
+  gen-art.py            生成像素风占位图
   styles/global.css     设计系统（配色 token + 组件样式）
 public/
   gallery/*.svg         服务器截图（占位图，可替换）
@@ -61,8 +65,26 @@ PUBLIC_GITHUB_URL=https://github.com/你 # GitHub 主页
 | 新项目 | 在 `src/data/projects.ts` 里加一条；详情页 `/projects/<slug>` 自动生成 |
 | 新文章 | 在 `src/content/blog/` 新建 `.md`（frontmatter：title / description / pubDate / tags）；列表与详情页自动生成 |
 | 新截图 | 图片放 `public/gallery/`，改 `src/data/gallery.ts` |
-| 模组 / 公告 / 规则 | 改 `src/data/mcserver.ts` |
+| 公告 / 规则 / 加入步骤 | 改 `src/data/mcserver.ts` |
 | 新板块 | 在 `src/config/site.ts` 的 `nav` 加一项 + 新建 `src/pages/<路径>.astro` |
+
+### 同步模组清单
+
+模组清单**不是手写的**，是从整合包仓库自动拉的：
+
+```bash
+python tools/sync-mods.py                                  # 默认仓库
+python tools/sync-mods.py --repo 用户/仓库 --branch main    # 指定仓库
+```
+
+脚本会读取仓库 `mods/` 下的所有 `.jar`，解析出显示名与版本，生成
+`src/data/mods.ts` 并按关键词自动分类（Create 生态 / 性能优化 / 客户端 UI …）。
+整合包增删模组后跑一次，然后提交即可。
+
+- 个别文件名解析得不好看？在 `tools/sync-mods.py` 的 `OVERRIDES` 里指定
+  `文件名 -> (显示名, 版本)`，或在 `PRETTY` 里改显示名。
+- 分类是关键词匹配的启发式规则，见同文件的 `CATEGORY_RULES`，可自行调整。
+- 页面带搜索框（支持搜原始文件名）与分类筛选，Esc 可清空搜索。
 
 ## MC 状态是怎么查的
 
@@ -114,7 +136,9 @@ PUBLIC_GITHUB_URL=https://github.com/你 # GitHub 主页
 - [ ] `public/gallery/` 里的 7 张图是脚本生成的像素风占位图（`python tools/gen-art.py` 可重新生成），
       换成真实服务器截图时建议导出 **WebP**，体积能从 1.1MB 降到 200KB 以内
 - [ ] `og:image` 现在指向 SVG，**微信等平台不支持 SVG 缩略图**，换图时导出 1200×630 的 JPG/PNG
-- [ ] `src/data/mcserver.ts` 的模组清单是占位数据，需要从整合包 manifest 导入真实列表
+- [x] 模组清单已接入真实数据：192 个模组，来自 `Muffin-s-ModPack-Mod-Updated` 仓库的 `mods/`
+- [ ] `Server Tools` / `Datapack Experiments` 还没有独立仓库，GitHub 链接暂指向主页
+- [ ] `siteConfig.author.contact` 为空，填上后 /about 才会显示联系方式那一块
 - [ ] `Server Tools` / `Datapack Experiments` 还没有独立仓库，暂时链接到 GitHub 主页
 - [ ] `src/config/site.ts` 的 `contact` 为空，填了才会显示联系方式区块
 - [ ] 可选：加 `robots.txt`、`sitemap.xml`（`@astrojs/sitemap`）与 RSS

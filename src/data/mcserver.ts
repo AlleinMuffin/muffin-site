@@ -3,20 +3,10 @@
  * 以后改模组清单、公告、规则都只动这个文件，页面结构不用碰。
  */
 
-export interface ModItem {
-  name: string;
-  version: string;
-}
-
-/** TODO: 换成整合包的真实模组清单（可从仓库里的 manifest 自动生成） */
-export const mods: ModItem[] = [
-  { name: "Create", version: "6.0.6" },
-  { name: "JEI", version: "19.0.3" },
-  { name: "Sodium", version: "neo-2.1" },
-  { name: "Mekanism", version: "10.4.5" },
-  { name: "Applied Energistics 2", version: "19.0.6" },
-  { name: "Immersive Engineering", version: "12.0.2" },
-];
+/**
+ * 模组清单不在本文件 —— 它由 tools/sync-mods.py 从整合包仓库生成到 ./mods.ts。
+ * 仓库里加了/删了模组，跑一次 `python tools/sync-mods.py` 即可。
+ */
 
 export interface Announcement {
   date: string;

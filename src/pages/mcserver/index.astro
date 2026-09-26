@@ -4,7 +4,8 @@ import SectionHead from "../../components/SectionHead.astro";
 import ServerStatusCard from "../../components/ServerStatusCard.astro";
 import Gallery from "../../components/Gallery.astro";
 import { siteConfig } from "../../config/site";
-import { mods, announcements, rules, joinSteps } from "../../data/mcserver";
+import { announcements, rules, joinSteps } from "../../data/mcserver";
+import { mods, modCategories, modCount } from "../../data/mods";
 
 const mc = siteConfig.mc;
 ---
@@ -35,21 +36,57 @@ const mc = siteConfig.mc;
   <!-- ==================== 模组 / 公告 / 规则 ==================== -->
   <section class="section" id="mods">
     <div class="container">
-      <SectionHead label="Modpack" title="模组清单" desc="当前整合包的主要模组。完整清单见整合包仓库。" />
+      <SectionHead
+        label="Modpack"
+        title="模组清单"
+        desc={`当前整合包共 ${modCount} 个模组，从整合包仓库自动同步。完整文件见仓库 mods/ 目录。`}
+      />
 
       <div class="panel" data-reveal>
         <h3 class="panel__title">模组列表</h3>
-        <p class="panel__desc">版本随整合包更新而变动，以仓库里的 manifest 为准。</p>
-        <div class="mod-list">
+        <p class="panel__desc">版本随整合包更新而变动，以仓库里的实际文件为准。</p>
+
+        <div class="mod-toolbar">
+          <label class="mod-search">
+            <span class="mod-search__icon" aria-hidden="true">⌕</span>
+            <input
+              id="mod-search"
+              type="search"
+              placeholder="搜索模组名或文件名…"
+              aria-label="搜索模组"
+              autocomplete="off"
+            />
+          </label>
+          <span class="mod-count" id="mod-count" aria-live="polite">
+            显示 <b>{modCount}</b> / {modCount}
+          </span>
+        </div>
+
+        <div class="mod-chips" id="mod-chips" role="group" aria-label="按分类筛选">
+          <button type="button" class="mod-chip is-active" data-cat="all">全部 {modCount}</button>
+          {
+            modCategories.map((c) => (
+              <button type="button" class="mod-chip" data-cat={c}>
+                {c} {mods.filter((m) => m.category === c).length}
+              </button>
+            ))
+          }
+        </div>
+
+        <div class="mod-list" id="mod-list">
           {
             mods.map((m) => (
-              <div class="mod-item">
-                <span class="mod-item__name">{m.name}</span>
-                <span class="mod-item__ver">{m.version}</span>
+              <div class="mod-item" data-cat={m.category} data-key={`${m.name} ${m.file}`.toLowerCase()}>
+                <div class="mod-item__top">
+                  <span class="mod-item__name">{m.name}</span>
+                  <span class="mod-item__ver">{m.version}</span>
+                </div>
+                <span class="mod-item__meta" title={m.file}>{m.file}</span>
               </div>
             ))
           }
         </div>
+        <p class="mod-empty is-hidden" id="mod-empty">没有匹配的模组，换个关键词试试。</p>
       </div>
 
       <div class="panel" data-reveal>
@@ -60,8 +97,8 @@ const mc = siteConfig.mc;
         <div class="terminal" style="margin-top:18px">
           <div class="terminal__bar"><span></span><span></span><span></span></div>
           <pre class="terminal__body mono">$ muffin check --server {mc.host} --profile latest
-<i>✔</i> 128 mods 已同步
-<i>!</i> 3 mods 需要更新</pre>
+<i>✔</i> {modCount} mods 已同步
+<i>!</i> 0 mods 需要更新</pre>
         </div>
       </div>
 
@@ -127,4 +164,9 @@ const mc = siteConfig.mc;
       <p><a class="btn btn--ghost" href="/">返回首页 <span aria-hidden="true">→</span></a></p>
     </div>
   </section>
+
+  <script>
+    import { initModFilter } from "../../scripts/mod-filter";
+    initModFilter();
+  </script>
 </BaseLayout>
