@@ -4,7 +4,7 @@ import SectionHead from "../../components/SectionHead.astro";
 import ServerStatusCard from "../../components/ServerStatusCard.astro";
 import Gallery from "../../components/Gallery.astro";
 import { siteConfig } from "../../config/site";
-import { announcements, rules, joinSteps } from "../../data/mcserver";
+import { announcements, constitution, joinSteps } from "../../data/mcserver";
 import { mods, modCategories, modCount } from "../../data/mods";
 
 const mc = siteConfig.mc;
@@ -123,16 +123,50 @@ const mc = siteConfig.mc;
 
       <div class="panel" data-reveal>
         <h3 class="panel__title">规则</h3>
-        <div class="rules">
+        <p class="panel__desc">
+          服务器现行规则以《{constitution.title}》为准，共 {constitution.chapters.length - 1} 章 33 条。点击章标题可折叠。
+        </p>
+
+        <article class="constitution">
+          <header class="constitution__head">
+            <h4 class="constitution__title">{constitution.title}</h4>
+            <p class="constitution__sub">{constitution.subtitle}</p>
+          </header>
+
           {
-            rules.map((r) => (
-              <p class="rule">
-                <span class="rule__dot" aria-hidden="true" />
-                <span>{r}</span>
-              </p>
+            constitution.chapters.map((ch) => (
+              <details class="chapter" open>
+                <summary class="chapter__title">{ch.title}</summary>
+                <div class="rules">
+                  {ch.articles.map((a) => (
+                    <div class="rule">
+                      <span class="rule__no mono">{a.no}</span>
+                      <div class="rule__body">
+                        <p class="rule__text">{a.text}</p>
+                        {a.sub && (
+                          <ul class="rule__sub">
+                            {a.sub.map((s) => (
+                              <li>{s}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </details>
             ))
           }
-        </div>
+
+          <footer class="constitution__foot">
+            {
+              constitution.signature.map((s) => (
+                <p class="constitution__sign mono">{s}</p>
+              ))
+            }
+            <p class="constitution__note">{constitution.note}</p>
+          </footer>
+        </article>
       </div>
     </div>
   </section>
