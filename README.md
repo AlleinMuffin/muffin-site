@@ -110,7 +110,7 @@ python tools/sync-mods.py --repo 用户/仓库 --branch main    # 指定仓库
 默认 60 秒自动刷新，标签页不可见时跳过。不想发任何网络请求就把
 `site.ts` 里的 `mc.liveStatus` 设为 `false`。
 
-## 部署到 Cloudflare Pages
+## 部署到 Cloudflare Pages（当前方案：push 即上线）
 
 1. 把本仓库推到 GitHub
 2. Cloudflare Dashboard → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**
@@ -121,12 +121,39 @@ python tools/sync-mods.py --repo 用户/仓库 --branch main    # 指定仓库
    | Framework preset | `Astro` |
    | Build command | `npm run build` |
    | Build output directory | `dist` |
-   | Node version | `20` 或更高（建议 22） |
+   | Node version | **必须 22.12+**（Astro 7 的硬性要求，低于此版本构建直接失败） |
+
+   推荐再显式加一个环境变量 `NODE_VERSION = 22` 兜底（仓库根目录的 `.node-version`
+   也写了 22，双保险）。
 
 4. 部署完成后 → **Custom domains** → 绑定 `muffinlab.dpdns.org`
-5. 如果域名已经在 Cloudflare 的 DNS 里，CNAME 会自动配置好，等证书签发即可
+5. 域名已在同一个 Cloudflare 账户下，DNS 记录会自动建好，等证书签发即可（几分钟）
 
-以后每次 `git push` 都会自动重新部署。
+**以后每次 `git push` 都会自动重新部署，不用再本地构建和手动上传。**
+
+### 从 Workers 迁移到 Pages 的注意事项
+
+`muffinlab.dpdns.org` 之前是绑在 Worker（自定义域名）上的，**同一个主机名不能同时归
+Worker 和 Pages**，按这个顺序做，避免记录冲突：
+
+1. Workers & Pages → 你的 Worker → **Settings → Domains & Routes** → 删掉 `muffinlab.dpdns.org`
+   （它自动创建的那条 AAAA 记录会一并移除）
+2. DNS → 删掉手动加的 A 记录（`@` → `192.0.2.1`），否则 Pages 建记录时会报"记录已存在"
+3. Pages → **Custom domains** → 绑定 `muffinlab.dpdns.org`
+4. 等 1–5 分钟 + 证书签发；期间站点会有几分钟不可访问，属正常
+
+绑定后 DNS 里应该同时有 IPv4 与 IPv6 的 Cloudflare 边缘地址。
+
+### DNS 备忘（originless 场景）
+
+站点是纯静态 Workers/Pages，没有真实源站 IP，所以 DNS 填的是 Cloudflare 官方保留地址：
+
+| 类型 | 值 | 说明 |
+| --- | --- | --- |
+| A | `192.0.2.1` | RFC 5737 保留段，开橙云后流量不会真去这里 |
+| AAAA | `100::` | 同上，IPv6 的保留地址 |
+
+**代理状态（橙云）必须开**，关掉就变成直连保留地址，站点立刻打不开。
 
 > 仓库是纯静态输出，托管到 Vercel / Netlify / GitHub Pages / 任意 Nginx
 > 也都是同一套：`npm run build` 后把 `dist/` 传上去。
