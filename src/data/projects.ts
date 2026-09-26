@@ -26,15 +26,16 @@ export const projects: Project[] = [
   {
     slug: "muffin-launcher",
     name: "Muffin Launcher",
-    description: "轻量启动器：一键同步整合包的模组、配置与资源包，开服即玩。",
+    description: "给群友同步服务器整合包用的小工具：指定启动器与 mods 目录，把本地模组对齐到服务器。",
     tags: ["工具", "整合包", "桌面端"],
-    version: "v1.2.0",
+    version: "alpha-v1.1",
     github: `${GITHUB_HOME}/Muffin-s-ModPack-Mod-Updated`,
+    download: `${GITHUB_HOME}/Muffin-s-ModPack-Mod-Updated/releases/latest`,
     featured: true,
     body: [
-      "Muffin Launcher 是为了解决「整合包更新一次，所有人的客户端就要重新配一遍」这个问题做的。",
-      "它读取服务器端的模组清单，和本地做差异比对，只下载真正变化的部分；配置文件和资源包同理。玩家点一次就能回到和服务器完全一致的状态。",
-      "目前支持 Windows，依赖 Java 17+。后续计划加上多版本隔离与启动参数预设。",
+      "Muffin Launcher 是给服务器群友更新整合包用的：双击运行 → 选手动模式 → 指定 HMCL.exe 和 mods 文件夹 → 点启动，本地模组就对齐到服务器端。",
+      "当前版本 alpha-v1.1，2026-08-17 发布。这版的变化有两条：暂时移除了自动探测功能，新增了「帮助」按钮。发布产物是 Windows 下的 MuffinLauncher-alpha-v1.1.exe，约 15 MB。",
+      "整合包「重度机械症：航空学」的模组清单就放在同一个仓库的 mods/ 目录里，本网站 /mcserver 上的模组清单也是从那儿自动同步的。",
     ],
   },
   {

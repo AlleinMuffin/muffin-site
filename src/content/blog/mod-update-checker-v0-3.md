@@ -26,7 +26,7 @@ muffin check --server play.simpfun.cn:32883 --profile latest
 输出大致是这样：
 
 ```text
-✔ 128 mods 已同步
+✔ 192 mods 已同步
 ! 3 mods 需要更新
     create-1.21.1-6.0.4   →   6.0.6
     jei-1.21.1-19.0.1     →   19.0.3
