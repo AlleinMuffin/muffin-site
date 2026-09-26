@@ -36,6 +36,8 @@ OVERRIDES = {
     "create_aeronautics_toolgun-0.2.2.jar": ("Create Aeronautics Toolgun", "0.2.2"),
     "c2me-neoforge-mc1.21.1-0.4.0-alpha.0.113.jar": ("C2ME", "0.4.0-alpha.113"),
     "fastleafdecay-35.jar": ("Fast Leaf Decay", "35"),
+    # 文件名带 [1.21.1-1.21.3] 版本区间，且是连写驼峰，自动解析不好看
+    "HopoBetterRuinedPortals-[1.21.1-1.21.3]-1.4.4b.jar": ("Hopo Better Ruined Portals", "1.4.4b"),
     "netmusic-1.5.1-neoforge+mc1.21.1.jar": ("Net Music", "1.5.1"),
     "wwoo-2.3.4.jar": ("WWOO", "2.3.4"),
     "smsn-neoforge-1.4.1-1.21.1.jar": ("SMSN", "1.4.1"),
@@ -294,6 +296,8 @@ def parse(fname):
 
     stem = fname[:-4] if fname.lower().endswith(".jar") else fname
     stem = re.sub(r"\([^)]*\)", " ", stem).strip()       # 去掉 (1.21+) 之类
+    # 去掉 [1.21.1-1.21.3] 这类方括号标记（多为支持的 MC 版本区间，不是模组名的一部分）
+    stem = re.sub(r"\[[^\]]*\]", " ", stem).strip()
     tokens = [t for t in re.split(r"[-_+\s]+", stem) if t]
 
     name_tokens = []

@@ -121,7 +121,7 @@ export const mods: ModItem[] = [
   { name: "FXNT Storage", version: "1.3.0", category: "工业能源", file: "fxntstorage-1.3.0+mc-1.21.1-neoforge.jar", size: 1650 },
   { name: "Fzzy Config", version: "0.7.6", category: "客户端 UI", file: "fzzy_config-0.7.6+1.21+neoforge.jar", size: 2314 },
   { name: "GeckoLib", version: "4.9.2", category: "库与依赖", file: "geckolib-neoforge-1.21.1-4.9.2.jar", size: 616 },
-  { name: "Hopo Better Ruined Portals [1.21.1", version: "1.21.3]-1.4.4b", category: "世界与建筑", file: "HopoBetterRuinedPortals-[1.21.1-1.21.3]-1.4.4b.jar", size: 450 },
+  { name: "Hopo Better Ruined Portals", version: "1.4.4b", category: "世界与建筑", file: "HopoBetterRuinedPortals-[1.21.1-1.21.3]-1.4.4b.jar", size: 450 },
   { name: "Horseman", version: "1.5.9", category: "冒险玩法", file: "horseman-neoforge-1.21.1-1.5.9.jar", size: 435 },
   { name: "Hot Bath", version: "3.0.0", category: "食物烹饪", file: "hotbath-1.21.1-3.0.0.jar", size: 696 },
   { name: "IMBlocker", version: "5.5.4", category: "库与依赖", file: "IMBlocker-5.5.4-neoforge+1.20.6-1.21.8.jar", size: 192 },
