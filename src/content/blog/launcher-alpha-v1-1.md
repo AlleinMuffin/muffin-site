@@ -20,10 +20,6 @@ Muffin Launcher 是用来给群友更新服务器整合包的：双击运行 →
 发布产物：`MuffinLauncher-alpha-v1.1.exe`，15,763,089 字节（约 15 MB）。
 下载地址见 [Releases 页面](https://github.com/AlleinMuffin/Muffin-s-ModPack-Mod-Updated/releases/latest)。
 
-## 为什么移除自动探测
-
-alpha-v1.0 的说明里写明了「自动探测有 bug，务必选手动」，这版索性移除。
-
 ## 使用前提
 
 - 需要本地已装好 HMCL（指定它的 exe 路径）
