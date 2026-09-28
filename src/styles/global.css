@@ -799,6 +799,70 @@ a.server-card:hover { border-color: #2e3542; transform: translateY(-2px); }
 .notice__text { margin-top: 4px; font-size: 0.94rem; }
 
 /* ==========================================================================
+   Modpack download
+   ========================================================================== */
+.dl-icon { width: 16px; height: 16px; flex: 0 0 auto; }
+
+.dl-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(120deg, rgba(110, 231, 183, 0.07), transparent 45%),
+    var(--card);
+  padding: clamp(24px, 4vw, 36px);
+  margin-bottom: 22px;
+}
+.dl-card__top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 28px; flex-wrap: wrap;
+}
+.dl-card__kicker {
+  font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--accent);
+}
+.dl-card__title { margin-top: 6px; font-size: 1.35rem; font-weight: 700; }
+.dl-card__desc { margin-top: 8px; max-width: 52ch; color: var(--muted); font-size: 0.94rem; line-height: 1.72; }
+.dl-card__desc code {
+  font-family: var(--font-mono); font-size: 0.86em;
+  padding: 1px 5px; border-radius: 5px; background: var(--bg-2); color: var(--text);
+}
+.dl-card__actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+.dl-meta {
+  margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--border);
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px;
+}
+.dl-meta__item dt {
+  font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+}
+.dl-meta__item dd { margin: 5px 0 0; font-size: 1.02rem; font-weight: 600; }
+
+.dl-note { margin-top: 18px; font-size: 0.84rem; color: var(--muted); line-height: 1.75; }
+
+.dl-band {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 28px; flex-wrap: wrap;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: linear-gradient(90deg, rgba(110, 231, 183, 0.06), transparent 55%), var(--card);
+  padding: clamp(28px, 5vw, 44px);
+}
+.dl-band__kicker {
+  font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent);
+}
+.dl-band__title { margin-top: 6px; font-size: clamp(1.4rem, 3vw, 1.8rem); font-weight: 700; }
+.dl-band__desc { margin-top: 8px; color: var(--muted); }
+.dl-band__actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+@media (max-width: 900px) {
+  .dl-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .dl-meta { grid-template-columns: 1fr; gap: 14px; }
+  .dl-card__actions .btn,
+  .dl-band__actions .btn { width: 100%; justify-content: center; }
+}
+
+/* ==========================================================================
    GitHub band + footer
    ========================================================================== */
 .github-band {

@@ -1,0 +1,99 @@
+---
+/**
+ * 整合包下载入口。
+ * variant="panel"：完整卡片，放在 /mcserver；variant="band"：横向条带，放在首页。
+ * 链接全部来自 src/config/site.ts 的 modpack 配置，不在这里硬编码地址。
+ */
+import { siteConfig, modpackDownloadUrl, modpackReleaseUrl } from "../config/site";
+
+interface Props {
+  variant?: "panel" | "band";
+}
+
+const { variant = "panel" } = Astro.props;
+const p = siteConfig.modpack;
+const downloadUrl = modpackDownloadUrl();
+const releaseUrl = modpackReleaseUrl();
+
+const meta = [
+  { label: "整合包版本", value: p.version },
+  { label: "游戏版本", value: p.gameVersion },
+  { label: "加载器", value: p.loader },
+  { label: "体积", value: p.size },
+  { label: "更新于", value: p.updated },
+];
+
+---
+
+{
+  variant === "band" ? (
+    <div class="dl-band" data-reveal>
+      <div>
+        <p class="dl-band__kicker mono">MODPACK DOWNLOAD</p>
+        <h2 class="dl-band__title">下载客户端整合包</h2>
+        <p class="dl-band__desc">
+          {p.version} · Minecraft {p.gameVersion} · {p.loader} · {p.size}
+        </p>
+      </div>
+      <div class="dl-band__actions">
+        <a class="btn btn--primary" href={downloadUrl} download={p.file}>
+          <svg class="dl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v12" />
+            <path d="m7 11 5 5 5-5" />
+            <path d="M5 21h14" />
+          </svg>
+          立即下载
+        </a>
+        <a class="btn btn--ghost" href="/mcserver">服务器详情 <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  ) : (
+    <div class="dl-card" data-reveal>
+      <div class="dl-card__top">
+        <div>
+          <p class="dl-card__kicker mono">MODPACK DOWNLOAD</p>
+          <h3 class="dl-card__title">客户端整合包</h3>
+          <p class="dl-card__desc">
+            和服务器完全对齐的客户端模组包，下载后用启动器导入，或解压覆盖到游戏目录的
+            <code>mods</code> 文件夹。
+          </p>
+        </div>
+
+        <div class="dl-card__actions">
+          <a class="btn btn--primary" href={downloadUrl} download={p.file}>
+            <svg class="dl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3v12" />
+              <path d="m7 11 5 5 5-5" />
+              <path d="M5 21h14" />
+            </svg>
+            下载整合包
+          </a>
+          {p.mirror && (
+            <a class="btn btn--ghost" href={p.mirror} target="_blank" rel="noopener noreferrer">
+              镜像下载
+            </a>
+          )}
+          <a class="btn btn--ghost" href={releaseUrl} target="_blank" rel="noopener noreferrer">
+            更新说明 <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+
+      <dl class="dl-meta">
+        {meta.map((m) => (
+          <div class="dl-meta__item">
+            <dt>{m.label}</dt>
+            <dd class="mono">{m.value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <p class="dl-note">
+        点击按钮直接开始下载 {p.file}（{p.size}），不会跳转到 GitHub。
+        需要先装好 Java 21 与 {p.loader}。整合包内模组版权归各自作者所有，仅供非商业用途。
+      </p>
+    </div>
+  )
+}

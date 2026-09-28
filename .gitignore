@@ -8,6 +8,10 @@
 tools/preview/
 tools/qa/
 
+# Python 缓存
+__pycache__/
+*.pyc
+
 # Node / Astro
 node_modules/
 dist/

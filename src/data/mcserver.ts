@@ -313,7 +313,7 @@ export const constitution: {
 /** 加入步骤；{host} 会被替换成配置里的真实 MC 地址 */
 export const joinSteps: string[] = [
   "安装 Java 21（推荐 Temurin 发行版），并在启动器里指定好路径。",
-  "下载整合包：用 Muffin Launcher 一键同步，或直接从整合包仓库手动安装。",
+  "下载整合包：用上方「整合包下载」卡片的直链一键下载，或用 Muffin Launcher 同步。",
   "启动游戏 → 多人游戏 → 添加服务器，地址填 <code>{host}</code>。",
   "进服后就可以开工了。",
 ];

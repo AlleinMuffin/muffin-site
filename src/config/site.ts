@@ -66,6 +66,32 @@ export const siteConfig = {
     signature: "Built with curiosity & caffeine.",
   },
 
+  /** ================= 整合包下载 =================
+   * 指向 GitHub Releases 的附件直链 —— 点一下直接开始下载文件，不会打开 GitHub 页面。
+   *
+   * tag 填 "latest" 时走 /releases/latest/download/ 路由，以后发新版只要附件文件名不变，
+   * 这里一个字都不用改；文件名变了才需要动 file。
+   */
+  modpack: {
+    /** 整合包仓库 */
+    repo: "AlleinMuffin/muffinlab-modpack",
+    /** Release 附件的文件名 */
+    file: "Mechanomania-Aero-MuffinExpanded.zip",
+    /** 指定 tag，或填 "latest" 自动跟随最新正式版 */
+    tag: "latest",
+    /** 页面上展示的版本号、体积等信息（写死即可，改版本号时顺手改） */
+    version: "v1.0.0",
+    size: "153 MB",
+    updated: "2026-09-28",
+    gameVersion: "1.21.1",
+    loader: "NeoForge",
+    /**
+     * 备用下载线路（可选）。国内直连 GitHub 可能偏慢，
+     * 填了第三方镜像的完整 URL 就会多显示一个「镜像下载」按钮；留空则不显示。
+     */
+    mirror: "",
+  },
+
   /** 联系方式（/about 用；不想公开就留空字符串，对应区块会自动隐藏） */
   contact: {
     email: "",
@@ -78,6 +104,22 @@ export const siteConfig = {
 export function absoluteUrl(path: string): string {
   const base = String(siteConfig.siteUrl).replace(/\/$/, "");
   return base + (path.startsWith("/") ? path : "/" + path);
+}
+
+/**
+ * 整合包附件的直链。
+ * tag 为 latest 时走 GitHub 的 latest 路由，自动跟随最新正式发布版本。
+ */
+export function modpackDownloadUrl(): string {
+  const p = siteConfig.modpack;
+  const route = p.tag === "latest" ? "latest/download" : `download/${p.tag}`;
+  return `https://github.com/${p.repo}/releases/${route}/${p.file}`;
+}
+
+/** Release 页面地址（要看更新说明、历史版本时用） */
+export function modpackReleaseUrl(): string {
+  const p = siteConfig.modpack;
+  return `https://github.com/${p.repo}/releases/${p.tag === "latest" ? "latest" : `tag/${p.tag}`}`;
 }
 
 /** 由 MC 地址拆出 host / port，minetools 用的是 /ping/<host>/<port> 形式 */

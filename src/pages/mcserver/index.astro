@@ -3,7 +3,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import SectionHead from "../../components/SectionHead.astro";
 import ServerStatusCard from "../../components/ServerStatusCard.astro";
 import Gallery from "../../components/Gallery.astro";
-import { siteConfig } from "../../config/site";
+import ModpackDownload from "../../components/ModpackDownload.astro";
+import { siteConfig, modpackDownloadUrl } from "../../config/site";
 import { announcements, constitution, joinSteps } from "../../data/mcserver";
 import { mods, modCategories, modCount } from "../../data/mods";
 
@@ -20,6 +21,9 @@ const mc = siteConfig.mc;
       <p class="page-hero__desc">{mc.intro}</p>
       <div class="page-hero__actions">
         <a class="btn btn--primary" href="#join">加入服务器</a>
+        <a class="btn btn--ghost" href={modpackDownloadUrl()} download={siteConfig.modpack.file}>
+          下载整合包 <span aria-hidden="true">↓</span>
+        </a>
         <a class="btn btn--ghost" href="/">返回首页 <span aria-hidden="true">→</span></a>
       </div>
     </div>
@@ -41,6 +45,8 @@ const mc = siteConfig.mc;
         title="模组清单"
         desc={`当前整合包共 ${modCount} 个模组，从整合包仓库自动同步。完整文件见仓库 mods/ 目录。`}
       />
+
+      <ModpackDownload />
 
       <div class="panel" data-reveal>
         <h3 class="panel__title">模组列表</h3>
