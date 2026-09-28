@@ -86,10 +86,25 @@ export const siteConfig = {
     gameVersion: "1.21.1",
     loader: "NeoForge",
     /**
-     * 备用下载线路（可选）。国内直连 GitHub 可能偏慢，
-     * 填了第三方镜像的完整 URL 就会多显示一个「镜像下载」按钮；留空则不显示。
+     * 国内加速镜像（可选）。数组里每一项渲染成一个按钮，空数组则不显示这一块。
+     *
+     * 这些都是第三方反代服务，可用性取决于对方，随时可能失效；
+     * url 填完整下载地址即可，失效时换一家或删掉该项。
+     * 如果哪天你自己买了对象存储，也往这里加一项最稳。
      */
-    mirror: "",
+    mirrors: [
+      {
+        label: "加速镜像 1",
+        url: "https://ghproxy.net/https://github.com/AlleinMuffin/muffinlab-modpack/releases/latest/download/Mechanomania-Aero-MuffinExpanded.zip",
+      },
+    ],
+
+    /**
+     * 整合包的 SHA-256。走第三方镜像等于把文件交到别人手上，
+     * 公开校验值让玩家能自己确认下载到的文件和发布的一致。
+     * 重新打包后务必更新：python -c "import hashlib;print(hashlib.sha256(open('文件','rb').read()).hexdigest())"
+     */
+    sha256: "7ee1235e439bf1387b713f33d3e2ba10761a12929ada92a5b0a22718402fca87",
   },
 
   /** 联系方式（/about 用；不想公开就留空字符串，对应区块会自动隐藏） */

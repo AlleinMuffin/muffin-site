@@ -1,0 +1,59 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHead from "../components/SectionHead.astro";
+import ModpackDownload from "../components/ModpackDownload.astro";
+import { siteConfig, modpackReleaseUrl } from "../config/site";
+
+const mc = siteConfig.mc;
+const p = siteConfig.modpack;
+
+const steps = [
+  "装好 Java 21（推荐 Temurin 发行版），启动器里指定它的路径。",
+  "下载整合包并解压，把里面的 mods 覆盖到游戏目录，或用启动器直接导入。",
+  `多人游戏 → 添加服务器，地址填 ${mc.host}。`,
+  "进服开工。",
+];
+---
+
+<BaseLayout
+  title={`整合包下载 — ${siteConfig.siteName}`}
+  description={`${mc.name} 客户端整合包下载：官方直链、国内高速镜像与 SHA-256 校验值，Minecraft ${p.gameVersion} / ${p.loader}。`}
+>
+  <section class="page-hero">
+    <div class="page-hero__media" aria-hidden="true"></div>
+    <div class="container page-hero__inner">
+      <p class="page-hero__label">Download</p>
+      <h1 class="page-hero__title">整合包下载</h1>
+      <p class="page-hero__desc">
+        {mc.name} 的客户端模组包，{p.version}，Minecraft {p.gameVersion} / {p.loader}，{p.size}。
+      </p>
+      <div class="page-hero__actions">
+        <a class="btn btn--ghost" href="/mcserver">服务器详情 <span aria-hidden="true">→</span></a>
+        <a class="btn btn--ghost" href="/">返回首页 <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <SectionHead
+        label="Download Options"
+        title="下载线路"
+        desc="优先用 GitHub 官方直链；国内下载慢时可以切换到高速镜像，两条线路的文件完全一致，可用校验值核对。"
+      />
+      <ModpackDownload />
+
+      <div class="panel" data-reveal>
+        <h3 class="panel__title">怎么装</h3>
+        <div class="terminal" style="margin-top:16px">
+          <div class="terminal__bar"><span></span><span></span><span></span></div>
+          <pre class="terminal__body mono">{steps.map((s, i) => `${i + 1}. ${s}`).join("\n")}</pre>
+        </div>
+        <p class="panel__desc" style="margin-top:16px">
+          历史版本、更新日志与源码都在
+          <a href={modpackReleaseUrl()} target="_blank" rel="noopener noreferrer">GitHub Release</a>。
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

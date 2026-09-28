@@ -23,6 +23,8 @@ const meta = [
   { label: "更新于", value: p.updated },
 ];
 
+/** 前 12 位 + 后 8 位，够肉眼比对又不占太大地方，完整值靠复制按钮 */
+const shortHash = `${p.sha256.slice(0, 12)}…${p.sha256.slice(-8)}`;
 ---
 
 {
@@ -45,6 +47,11 @@ const meta = [
           </svg>
           立即下载
         </a>
+        {p.mirrors.length > 0 && (
+          <a class="btn btn--ghost" href={p.mirrors[0].url} download={p.file}>
+            国内加速
+          </a>
+        )}
         <a class="btn btn--ghost" href="/mcserver">服务器详情 <span aria-hidden="true">→</span></a>
       </div>
     </div>
@@ -70,16 +77,28 @@ const meta = [
             </svg>
             下载整合包
           </a>
-          {p.mirror && (
-            <a class="btn btn--ghost" href={p.mirror} target="_blank" rel="noopener noreferrer">
-              镜像下载
-            </a>
-          )}
           <a class="btn btn--ghost" href={releaseUrl} target="_blank" rel="noopener noreferrer">
             更新说明 <span aria-hidden="true">↗</span>
           </a>
         </div>
       </div>
+
+      {p.mirrors.length > 0 && (
+        <div class="dl-mirrors">
+          <p class="dl-mirrors__title">
+            国内高速镜像
+            <span>GitHub 直连慢时换这里，文件完全一样</span>
+          </p>
+          <div class="dl-mirrors__list">
+            {p.mirrors.map((m) => (
+              <a class="btn btn--ghost btn--sm" href={m.url} download={p.file}>
+                {m.label}
+              </a>
+            ))}
+            <a class="btn btn--ghost btn--sm" href="/download">全部线路与校验 <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      )}
 
       <dl class="dl-meta">
         {meta.map((m) => (
@@ -90,10 +109,25 @@ const meta = [
         ))}
       </dl>
 
+      <div class="dl-hash">
+        <span class="dl-hash__label">SHA-256</span>
+        <code class="dl-hash__value mono" title={p.sha256}>{shortHash}</code>
+        <button type="button" class="btn--copy" data-copy-value={p.sha256}>
+          <span data-copy-label>复制校验值</span>
+        </button>
+      </div>
+
       <p class="dl-note">
-        点击按钮直接开始下载 {p.file}（{p.size}），不会跳转到 GitHub。
-        需要先装好 Java 21 与 {p.loader}。整合包内模组版权归各自作者所有，仅供非商业用途。
+        下载后用这个校验值核对文件，确认和你预期的一致：Windows 可用
+        <code>certutil -hashfile 文件名 SHA256</code>，macOS / Linux 用
+        <code>sha256sum 文件名</code>。
+        整合包内模组版权归各自作者所有，仅供非商业用途。
       </p>
     </div>
   )
 }
+
+<script>
+  import { initCopyValue } from "../scripts/copy-value";
+  initCopyValue();
+</script>
