@@ -86,15 +86,31 @@ export const siteConfig = {
     gameVersion: "1.21.1",
     loader: "NeoForge",
     /**
-     * 国内加速镜像（可选）。数组里每一项渲染成一个按钮，空数组则不显示这一块。
+     * 主下载线路 —— 页面上的大按钮就指向它，应当填国内能跑满速的地址。
      *
-     * 这些都是第三方反代服务，可用性取决于对方，随时可能失效；
-     * url 填完整下载地址即可，失效时换一家或删掉该项。
-     * 如果哪天你自己买了对象存储，也往这里加一项最稳。
+     * 注意：第三方 GitHub 反代（ghproxy 之类）普遍前期快、后期掉到几十 KB/s，
+     * 因为它们自己也要从 GitHub 拉流，带宽有限。真要稳定，得把文件放进国内存储：
+     * 腾讯云 COS / 阿里云 OSS / 七牛云 / 又拍云的对象存储直链都行
+     *（用它们自带的公网域名，不需要自定义域名，也就不涉及备案）。
+     * 留空则主按钮自动退回 GitHub 直链。
+     */
+    cn: {
+      label: "高速下载",
+      // 实测三家能连通的反代里它最快且不掉速：18 秒平均 2.1 MB/s，
+      // 分段测 1.17 / 1.83 / 1.48 MB/s（ghproxy.net 同期只有 24 KB/s，且越跑越慢）。
+      // 反代服务随时可能失效，失效时把 url 清空，主按钮会自动退回 GitHub 直链。
+      url: "https://ghfile.geekertao.top/https://github.com/AlleinMuffin/muffinlab-modpack/releases/latest/download/Mechanomania-Aero-MuffinExpanded.zip",
+      /** 一句话说明，填了显示在按钮下方 */
+      note: "主线路为第三方加速节点，实测约 1.5 MB/s 且不掉速；失效时请用下面的 GitHub 直链。",
+    },
+
+    /**
+     * 备用线路（可选）。数组里每一项渲染成一个小按钮，空数组则不显示这一块。
+     * 第三方反代失效是常态，随时换一家或删掉该项即可。
      */
     mirrors: [
       {
-        label: "加速镜像 1",
+        label: "反代备用 1",
         url: "https://ghproxy.net/https://github.com/AlleinMuffin/muffinlab-modpack/releases/latest/download/Mechanomania-Aero-MuffinExpanded.zip",
       },
     ],
